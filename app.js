@@ -96,15 +96,19 @@
   // ---------------------------------------------------------------
   function parseLinks(text) {
     var str = escapeHtml(text);
-    // Find plain text URLs starting with http:// or https://
-    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    // Catches https://, http://, and links starting directly with www.
+    var urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+    
     return str.replace(urlRegex, function(url) {
+      // Ensure absolute path formatting for anchor tags
+      var href = url.startsWith('www.') ? 'https://' + url : url;
       var label = 'View Link';
+      
       if (url.indexOf('drive.google') !== -1) label = 'Google Drive';
       else if (url.indexOf('docs.google') !== -1) label = 'Docs/Sheets';
       else if (url.indexOf('.pdf') !== -1) label = 'PDF File';
       
-      return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="link-badge">' +
+      return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="link-badge">' +
              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> ' + 
              label + '</a>';
     });
@@ -151,15 +155,16 @@
       return;
     }
     
-    // Injecting parseLinks() around fields that might contain URLs (like Subject and Remarks)
+    // Applying parseLinks() to all fields that might contain URLs
     ledgerBody.innerHTML = letters.map(function (l) {
       var subjectOutput = parseLinks(l.subject);
       var respondedOutput = parseLinks(l.respondedMemo);
+      var memoOutput = parseLinks(l.memoNo);
       
       return '<tr>' +
         '<td class="col-sl"><span class="sl-badge">' + escapeHtml(l.slNo) + '</span></td>' +
         '<td class="col-subject">' + subjectOutput + (state.searchMode ? ' <br><span style="color:var(--text-secondary);font-size:0.75rem">(' + escapeHtml(l.month) + ')</span>' : '') + '</td>' +
-        '<td class="col-memo">' + escapeHtml(l.memoNo) + '</td>' +
+        '<td class="col-memo">' + memoOutput + '</td>' +
         '<td class="col-date">' + escapeHtml(l.date) + '</td>' +
         '<td class="col-date">' + escapeHtml(l.timeLine) + '</td>' +
         '<td class="col-status">' + statusBadge(l) + '</td>' +
