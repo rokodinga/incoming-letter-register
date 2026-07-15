@@ -3,7 +3,6 @@
 
   // ---------------------------------------------------------------
   // Connection config
-  // Read URL from config.js directly, Key from local storage
   // ---------------------------------------------------------------
   var cfg = {
     webAppUrl: window.DEFAULT_CONFIG ? window.DEFAULT_CONFIG.webAppUrl : '',
@@ -70,10 +69,23 @@
     if (!s) return null;
     var parts = String(s).split(/[\/\-]/);
     if (parts.length !== 3) return null;
-    var d = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1, y = parseInt(parts[2], 10);
-    if (y < 100) y += 2000;
-    var dt = new Date(y, m, d);
-    return isNaN(dt.getTime()) ? null : dt;
+    
+    // Support YYYY-MM-DD (HTML5) or DD/MM/YYYY (Legacy)
+    if (parts[0].length === 4) {
+      return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    } else {
+      var y = parseInt(parts[2], 10);
+      if (y < 100) y += 2000;
+      return new Date(y, parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+    }
+  }
+
+  function formatForInput(dateStr) {
+    var dt = parseDMY(dateStr);
+    if (!dt) return '';
+    var m = dt.getMonth() + 1;
+    var d = dt.getDate();
+    return dt.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (d < 10 ? '0' : '') + d;
   }
 
   function isOverdue(letter) {
@@ -125,13 +137,19 @@
   }
 
   function renderSummary(letters) {
+    var total = letters.length;
     var pending = letters.filter(function (l) { return l.status === 'Pending' && !isOverdue(l); }).length;
     var overdue = letters.filter(isOverdue).length;
     var responded = letters.filter(function (l) { return l.status === 'Responded'; }).length;
+    
     $('count-pending').textContent = pending;
     $('count-overdue').textContent = overdue;
     $('count-responded').textContent = responded;
-    $('count-total').textContent = letters.length;
+    $('count-total').textContent = total;
+
+    // Advanced Analytic: Clearance Rate
+    var rate = total === 0 ? 0 : Math.round((responded / total) * 100);
+    $('count-rate').textContent = rate + '%';
   }
 
   function statusBadge(letter) {
@@ -284,7 +302,14 @@
 
     fields.forEach(function (f) {
       var el = $('f-' + f);
-      el.value = isEdit ? (letter[f] || '') : (f === 'status' ? 'Pending' : '');
+      if (!el) return;
+      var val = isEdit ? (letter[f] || '') : (f === 'status' ? 'Pending' : '');
+      // If the field is a date input, format it appropriately for HTML5
+      if (el.type === 'date' && val) {
+        el.value = formatForInput(val);
+      } else {
+        el.value = val;
+      }
     });
     letterModal.showModal();
   }
@@ -297,7 +322,18 @@
     var row = $('f-row').value;
     var month = $('f-month').value;
     var data = {};
-    fields.forEach(function (f) { data[f] = $('f-' + f).value; });
+    
+    fields.forEach(function (f) {
+      var el = $('f-' + f);
+      // For date fields, we might need to convert YYYY-MM-DD back to DD/MM/YYYY if Apps Script expects it
+      // Standardizing on string is fine, apps script formats it on arrival.
+      if (el.type === 'date' && el.value) {
+          var parts = el.value.split('-');
+          data[f] = parts[2] + '/' + parts[1] + '/' + parts[0]; 
+      } else {
+          data[f] = el.value; 
+      }
+    });
 
     var action = row ? 'updateLetter' : 'addLetter';
     var params = row ? { month: month, row: row, data: data } : { month: month, data: data };
@@ -352,6 +388,13 @@
         applyFilters();
       });
     }, 350);
+  });
+  
+  // PDF Export Trigger
+  $('export-btn').addEventListener('click', function() {
+    setTimeout(function() {
+      window.print();
+    }, 150);
   });
 
   // ---------------------------------------------------------------
