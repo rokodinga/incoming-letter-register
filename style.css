@@ -1,0 +1,308 @@
+:root{
+  --ink:        #1F2A44;
+  --ink-soft:   #4A5578;
+  --paper:      #EEF0EA;
+  --paper-card: #F8F8F4;
+  --rule:       #CBC6B4;
+  --rule-soft:  #DEDBCB;
+  --stamp-red:    #B23A2E;
+  --stamp-red-bg: #F6E4DF;
+  --stamp-green:    #2F6844;
+  --stamp-green-bg: #E3EBDD;
+  --stamp-amber:    #96661B;
+  --stamp-amber-bg: #F3E7CE;
+
+  --font-display: 'Zilla Slab', Georgia, serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+  --radius: 3px;
+}
+
+*{ box-sizing: border-box; }
+
+html,body{
+  margin:0; padding:0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+body{
+  background-image:
+    linear-gradient(var(--paper), var(--paper)),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(31,42,68,0.035) 28px);
+}
+
+.register{
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 24px 60px;
+}
+
+/* ---------- Masthead ---------- */
+.masthead{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding-bottom: 18px;
+  border-bottom: 3px double var(--ink);
+  margin-bottom: 22px;
+}
+.masthead__mark{ color: var(--ink); flex-shrink:0; }
+.masthead__title{ flex-grow:1; }
+.masthead__title h1{
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  margin: 0 0 2px;
+  letter-spacing: 0.2px;
+}
+.masthead__sub{
+  margin:0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.masthead__actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.conn-dot{
+  width:10px; height:10px; border-radius:50%;
+  display:inline-block;
+  background: var(--stamp-red);
+  box-shadow: 0 0 0 3px var(--stamp-red-bg);
+}
+.conn-dot--on{ background: var(--stamp-green); box-shadow: 0 0 0 3px var(--stamp-green-bg); }
+
+/* ---------- Buttons ---------- */
+.btn{
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--ink);
+  cursor: pointer;
+  background: transparent;
+  color: var(--ink);
+  transition: transform .12s ease, background .15s ease;
+}
+.btn:hover{ transform: translateY(-1px); }
+.btn:active{ transform: translateY(0); }
+.btn--primary{ background: var(--ink); color: var(--paper-card); }
+.btn--primary:hover{ background: #2c3a5e; }
+.btn--ghost{ border-color: var(--rule); color: var(--ink-soft); }
+.btn--ghost:hover{ border-color: var(--ink); color: var(--ink); }
+.btn--danger{ border-color: var(--stamp-red); color: var(--stamp-red); }
+.btn--danger:hover{ background: var(--stamp-red-bg); }
+
+/* ---------- Summary stamp cards ---------- */
+.summary{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.stamp-card{
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.stamp-card::before{
+  content:'';
+  position:absolute; left:0; top:0; bottom:0; width:4px;
+}
+.stamp-card__num{
+  display:block;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+}
+.stamp-card__label{
+  display:block;
+  margin-top:4px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--ink-soft);
+}
+.stamp-card--pending::before{ background: var(--stamp-amber); }
+.stamp-card--pending .stamp-card__num{ color: var(--stamp-amber); }
+.stamp-card--overdue::before{ background: var(--stamp-red); }
+.stamp-card--overdue .stamp-card__num{ color: var(--stamp-red); }
+.stamp-card--responded::before{ background: var(--stamp-green); }
+.stamp-card--responded .stamp-card__num{ color: var(--stamp-green); }
+.stamp-card--total::before{ background: var(--ink); }
+
+/* ---------- Toolbar ---------- */
+.toolbar{
+  display:flex;
+  gap: 14px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.field{ display:flex; flex-direction:column; gap:5px; }
+.field--grow{ flex-grow:1; min-width: 220px; }
+.field--full{ grid-column: 1 / -1; }
+.field__label{
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+input, select, textarea{
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-card);
+  color: var(--ink);
+}
+input:focus, select:focus, textarea:focus{
+  outline: 2px solid var(--ink-soft);
+  outline-offset: 1px;
+}
+textarea{ resize: vertical; font-family: var(--font-body); }
+
+/* ---------- Ledger table ---------- */
+.ledger-wrap{
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+table.ledger{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 920px;
+}
+.ledger thead th{
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  padding: 12px 14px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--paper);
+  position: sticky; top:0;
+}
+.ledger tbody td{
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--rule-soft);
+  vertical-align: top;
+  font-size: 13.5px;
+}
+.ledger tbody tr:hover{ background: rgba(31,42,68,0.035); }
+.col-sl{ font-family: var(--font-mono); width: 70px; }
+.col-memo, .col-date{ font-family: var(--font-mono); white-space: nowrap; }
+.col-subject{ max-width: 320px; }
+.col-actions{ width: 110px; }
+.empty-row{ text-align:center; color: var(--ink-soft); padding: 34px 14px !important; font-style: italic; }
+
+.sl-badge{
+  display:inline-block;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  background: var(--paper);
+  border: 1px dashed var(--rule);
+  border-radius: 2px;
+  padding: 2px 7px;
+}
+
+.status-stamp{
+  display:inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 3px 9px;
+  border-radius: 2px;
+  border: 1.5px solid currentColor;
+  transform: rotate(-2deg);
+}
+.status-stamp--pending{ color: var(--stamp-amber); background: var(--stamp-amber-bg); }
+.status-stamp--overdue{ color: var(--stamp-red); background: var(--stamp-red-bg); }
+.status-stamp--responded{ color: var(--stamp-green); background: var(--stamp-green-bg); }
+
+.row-link{
+  background:none; border:none; cursor:pointer;
+  font-family: var(--font-body); font-weight:600; font-size: 12.5px;
+  color: var(--ink); text-decoration: underline;
+  padding: 2px 0;
+}
+
+/* ---------- Modal ---------- */
+.modal{
+  border:none; border-radius: 6px;
+  padding: 26px 28px 22px;
+  max-width: 560px;
+  width: 92vw;
+  border-top: 4px solid var(--ink);
+  background: var(--paper-card);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+.modal::backdrop{ background: rgba(31,42,68,0.45); }
+.modal h2{ font-family: var(--font-display); margin: 0 0 6px; font-size: 21px; }
+.modal-help{ margin: 0 0 16px; font-size: 13px; color: var(--ink-soft); }
+.modal-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.modal-actions{
+  display:flex; justify-content:flex-end; gap:10px;
+}
+.modal-actions .btn--danger{ margin-right:auto; }
+
+/* ---------- Footer / toast ---------- */
+.foot-note{
+  margin-top: 22px;
+  text-align:center;
+}
+.foot-note p{
+  font-size: 12px; color: var(--ink-soft); font-style: italic;
+}
+
+.toast{
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--paper-card);
+  padding: 11px 20px; border-radius: var(--radius);
+  font-size: 13.5px; font-weight: 500;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  z-index: 50;
+}
+.toast--error{ background: var(--stamp-red); }
+.toast--ok{ background: var(--stamp-green); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 760px){
+  .summary{ grid-template-columns: repeat(2,1fr); }
+  .modal-grid{ grid-template-columns: 1fr; }
+  .masthead{ flex-wrap: wrap; }
+  .masthead__actions{ width:100%; justify-content:flex-start; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .btn{ transition:none; }
+}
