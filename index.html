@@ -4,35 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Incoming Letter Register 2026</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="register">
 
-  <!-- Header / masthead -->
   <header class="masthead">
-    <div class="masthead__mark" aria-hidden="true">
-      <svg viewBox="0 0 60 60" width="46" height="46">
-        <circle cx="30" cy="30" r="27" fill="none" stroke="currentColor" stroke-width="2"/>
-        <circle cx="30" cy="30" r="21" fill="none" stroke="currentColor" stroke-width="1"/>
-        <text x="30" y="35" text-anchor="middle" font-family="IBM Plex Mono" font-size="11" fill="currentColor">IN</text>
-      </svg>
-    </div>
     <div class="masthead__title">
       <h1>Incoming Letter Register</h1>
       <p class="masthead__sub">Dak &amp; correspondence tracker · <span id="year-label">2026</span></p>
     </div>
     <div class="masthead__actions">
       <span id="conn-status" class="conn-dot conn-dot--off" title="Not connected"></span>
-      <button id="settings-btn" class="btn btn--ghost" type="button">Connection settings</button>
-      <button id="new-letter-btn" class="btn btn--primary" type="button">+ New letter</button>
+      <button id="settings-btn" class="btn btn--ghost" type="button">Settings</button>
+      <button id="new-letter-btn" class="btn btn--primary" type="button">+ New Letter</button>
     </div>
   </header>
 
-  <!-- Summary strip -->
   <section class="summary" id="summary-cards" aria-label="Summary">
     <div class="stamp-card stamp-card--pending">
       <span class="stamp-card__num" id="count-pending">–</span>
@@ -52,27 +41,25 @@
     </div>
   </section>
 
-  <!-- Toolbar -->
   <section class="toolbar">
     <label class="field">
-      <span class="field__label">Month</span>
+      <span class="field__label">Month Partition</span>
       <select id="month-select"></select>
     </label>
     <label class="field field--grow">
-      <span class="field__label">Search</span>
-      <input id="search-input" type="text" placeholder="Search by subject, memo no. or date… (searches all months)">
+      <span class="field__label">Global Search</span>
+      <input id="search-input" type="text" placeholder="Search by subject, memo no. or date...">
     </label>
     <label class="field">
-      <span class="field__label">Status</span>
+      <span class="field__label">Status Filter</span>
       <select id="status-filter">
-        <option value="">All</option>
+        <option value="">All Statuses</option>
         <option value="Pending">Pending</option>
         <option value="Responded">Responded</option>
       </select>
     </label>
   </section>
 
-  <!-- Table -->
   <section class="ledger-wrap">
     <table class="ledger" id="ledger-table">
       <thead>
@@ -83,37 +70,37 @@
           <th class="col-date">Date</th>
           <th class="col-date">Time Line</th>
           <th class="col-status">Status</th>
-          <th class="col-responded">Responded (Memo &amp; Date)</th>
+          <th class="col-responded">Responded Data</th>
           <th class="col-actions">Actions</th>
         </tr>
       </thead>
       <tbody id="ledger-body">
-        <tr><td colspan="8" class="empty-row">Connect to your spreadsheet to load letters. Click "Connection settings" above.</td></tr>
+        <tr><td colspan="8" class="empty-row">Connect to your spreadsheet to load letters. Click "Settings" above.</td></tr>
       </tbody>
     </table>
   </section>
 
   <footer class="foot-note">
-    <p>Data lives in your private Google Sheet. This page never stores it — every read and write goes through your own Apps Script API.</p>
+    <p>Data lives securely in your private Google Sheet. Every read and write goes through your own API.</p>
   </footer>
 </div>
 
-<!-- Letter add/edit modal -->
 <dialog id="letter-modal" class="modal">
   <form id="letter-form" method="dialog">
     <h2 id="modal-title">New letter</h2>
+    <p class="modal-help">Fill in the details for the incoming correspondence.</p>
     <input type="hidden" id="f-row">
     <input type="hidden" id="f-month">
 
     <div class="modal-grid">
       <label class="field"><span class="field__label">SL No</span>
-        <input id="f-slNo" type="text" placeholder="auto"></label>
+        <input id="f-slNo" type="text" placeholder="Auto-generated"></label>
       <label class="field"><span class="field__label">Status</span>
         <select id="f-status">
           <option value="Pending">Pending</option>
           <option value="Responded">Responded</option>
         </select></label>
-      <label class="field field--full"><span class="field__label">Subject</span>
+      <label class="field field--full"><span class="field__label">Subject (Include links here if needed)</span>
         <textarea id="f-subject" rows="2" required></textarea></label>
       <label class="field"><span class="field__label">Memo No.</span>
         <input id="f-memoNo" type="text"></label>
@@ -125,30 +112,31 @@
         <input id="f-respondedThrough" type="text"></label>
       <label class="field field--full"><span class="field__label">Responded with Memo No &amp; Date</span>
         <input id="f-respondedMemo" type="text"></label>
-      <label class="field field--full"><span class="field__label">Remarks</span>
-        <textarea id="f-remarks" rows="2"></textarea></label>
+      <label class="field field--full"><span class="field__label">Remarks / Document Links</span>
+        <textarea id="f-remarks" rows="2" placeholder="Paste drive links here..."></textarea></label>
     </div>
 
     <div class="modal-actions">
-      <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
       <button type="button" class="btn btn--danger" id="modal-delete" hidden>Delete</button>
-      <button type="submit" class="btn btn--primary" id="modal-save">Save letter</button>
+      <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
+      <button type="submit" class="btn btn--primary" id="modal-save">Save Letter</button>
     </div>
   </form>
 </dialog>
 
-<!-- Settings modal -->
 <dialog id="settings-modal" class="modal">
   <form id="settings-form" method="dialog">
-    <h2>Connection settings</h2>
-    <p class="modal-help">Paste the Web App URL and API key from your Apps Script deployment (see SETUP.md).</p>
-    <label class="field field--full"><span class="field__label">Apps Script Web App URL</span>
-      <input id="s-url" type="url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" required></label>
-    <label class="field field--full"><span class="field__label">API key</span>
-      <input id="s-key" type="text" required></label>
+    <h2>Connection Settings</h2>
+    <p class="modal-help">Paste the Web App URL and API key from your Apps Script deployment.</p>
+    <div class="modal-grid">
+        <label class="field field--full"><span class="field__label">Apps Script Web App URL</span>
+        <input id="s-url" type="url" placeholder="https://script.google.com/macros/s/.../exec" required></label>
+        <label class="field field--full"><span class="field__label">API Key</span>
+        <input id="s-key" type="text" required></label>
+    </div>
     <div class="modal-actions">
       <button type="button" class="btn btn--ghost" id="settings-cancel">Cancel</button>
-      <button type="submit" class="btn btn--primary">Save &amp; connect</button>
+      <button type="submit" class="btn btn--primary">Save &amp; Connect</button>
     </div>
   </form>
 </dialog>
