@@ -8,8 +8,31 @@
 </head>
 <body>
 
-<div class="register">
+<div id="login-screen" class="login-overlay" hidden>
+  <div class="login-card">
+    <div class="login-header">
+      <svg viewBox="0 0 60 60" width="46" height="46" style="color: var(--brand-primary); margin-bottom: 16px;">
+        <circle cx="30" cy="30" r="27" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="30" cy="30" r="21" fill="none" stroke="currentColor" stroke-width="1"/>
+        <text x="30" y="35" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="11" fill="currentColor">IN</text>
+      </svg>
+      <h2>System Login</h2>
+      <p>Enter your access token to view the register.</p>
+    </div>
+    
+    <form id="login-form">
+      <div class="field" style="margin-bottom: 24px;">
+        <label class="field__label" for="login-key">Access Token</label>
+        <input id="login-key" type="password" placeholder="••••••••••••" required>
+      </div>
+      <button type="submit" class="btn btn--primary" style="width: 100%; padding: 12px; font-size: 1rem;">
+        Sign In to Dashboard
+      </button>
+    </form>
+  </div>
+</div>
 
+<div class="register">
   <header class="masthead">
     <div class="masthead__title">
       <h1>Incoming Letter Register</h1>
@@ -17,7 +40,7 @@
     </div>
     <div class="masthead__actions">
       <span id="conn-status" class="conn-dot conn-dot--off" title="Not connected"></span>
-      <button id="settings-btn" class="btn btn--ghost" type="button">Settings</button>
+      <button id="logout-btn" class="btn btn--ghost" type="button">Logout</button>
       <button id="new-letter-btn" class="btn btn--primary" type="button">+ New Letter</button>
     </div>
   </header>
@@ -75,7 +98,7 @@
         </tr>
       </thead>
       <tbody id="ledger-body">
-        <tr><td colspan="8" class="empty-row">Connect to your spreadsheet to load letters. Click "Settings" above.</td></tr>
+        <tr><td colspan="8" class="empty-row">Authenticate to load letters.</td></tr>
       </tbody>
     </table>
   </section>
@@ -120,23 +143,6 @@
       <button type="button" class="btn btn--danger" id="modal-delete" hidden>Delete</button>
       <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
       <button type="submit" class="btn btn--primary" id="modal-save">Save Letter</button>
-    </div>
-  </form>
-</dialog>
-
-<dialog id="settings-modal" class="modal">
-  <form id="settings-form" method="dialog">
-    <h2>Connection Settings</h2>
-    <p class="modal-help">Paste the Web App URL and API key from your Apps Script deployment.</p>
-    <div class="modal-grid">
-        <label class="field field--full"><span class="field__label">Apps Script Web App URL</span>
-        <input id="s-url" type="url" placeholder="https://script.google.com/macros/s/.../exec" required></label>
-        <label class="field field--full"><span class="field__label">API Key</span>
-        <input id="s-key" type="text" required></label>
-    </div>
-    <div class="modal-actions">
-      <button type="button" class="btn btn--ghost" id="settings-cancel">Cancel</button>
-      <button type="submit" class="btn btn--primary">Save &amp; Connect</button>
     </div>
   </form>
 </dialog>
