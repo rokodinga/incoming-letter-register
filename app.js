@@ -2,7 +2,7 @@
   'use strict';
 
   // ---------------------------------------------------------------
-  // Connection config (localStorage overrides config.js defaults)
+  // Connection config
   // ---------------------------------------------------------------
   var cfg = {
     webAppUrl: localStorage.getItem('ilr_url') || (window.DEFAULT_CONFIG && window.DEFAULT_CONFIG.webAppUrl) || '',
@@ -16,9 +16,6 @@
     searchMode: false
   };
 
-  // ---------------------------------------------------------------
-  // DOM refs
-  // ---------------------------------------------------------------
   var $ = function (id) { return document.getElementById(id); };
   var monthSelect = $('month-select');
   var searchInput = $('search-input');
@@ -50,7 +47,6 @@
       return fetch(cfg.webAppUrl + '?' + qs).then(function (r) { return r.json(); });
     }
 
-    // Use text/plain to avoid a CORS preflight against Apps Script.
     return fetch(cfg.webAppUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -59,7 +55,7 @@
   }
 
   // ---------------------------------------------------------------
-  // Toast
+  // Toast & Dates
   // ---------------------------------------------------------------
   var toastEl = $('toast');
   var toastTimer;
@@ -71,9 +67,6 @@
     toastTimer = setTimeout(function () { toastEl.hidden = true; }, 3200);
   }
 
-  // ---------------------------------------------------------------
-  // Date helpers (dd/mm/yyyy strings, as used in the sheet)
-  // ---------------------------------------------------------------
   function parseDMY(s) {
     if (!s) return null;
     var parts = String(s).split(/[\/\-]/);
@@ -96,6 +89,25 @@
   function todayLabelMonth() {
     var now = new Date();
     return now.toLocaleString('en-US', { month: 'long' }) + ' ' + now.getFullYear();
+  }
+
+  // ---------------------------------------------------------------
+  // Link Parser Helper
+  // ---------------------------------------------------------------
+  function parseLinks(text) {
+    var str = escapeHtml(text);
+    // Find plain text URLs starting with http:// or https://
+    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    return str.replace(urlRegex, function(url) {
+      var label = 'View Link';
+      if (url.indexOf('drive.google') !== -1) label = 'Google Drive';
+      else if (url.indexOf('docs.google') !== -1) label = 'Docs/Sheets';
+      else if (url.indexOf('.pdf') !== -1) label = 'PDF File';
+      
+      return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="link-badge">' +
+             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> ' + 
+             label + '</a>';
+    });
   }
 
   // ---------------------------------------------------------------
@@ -138,16 +150,21 @@
       ledgerBody.innerHTML = '<tr><td colspan="8" class="empty-row">No letters found for this view.</td></tr>';
       return;
     }
+    
+    // Injecting parseLinks() around fields that might contain URLs (like Subject and Remarks)
     ledgerBody.innerHTML = letters.map(function (l) {
+      var subjectOutput = parseLinks(l.subject);
+      var respondedOutput = parseLinks(l.respondedMemo);
+      
       return '<tr>' +
         '<td class="col-sl"><span class="sl-badge">' + escapeHtml(l.slNo) + '</span></td>' +
-        '<td class="col-subject">' + escapeHtml(l.subject) + (state.searchMode ? ' <span style="color:var(--ink-soft);font-size:11px">(' + escapeHtml(l.month) + ')</span>' : '') + '</td>' +
+        '<td class="col-subject">' + subjectOutput + (state.searchMode ? ' <br><span style="color:var(--text-secondary);font-size:0.75rem">(' + escapeHtml(l.month) + ')</span>' : '') + '</td>' +
         '<td class="col-memo">' + escapeHtml(l.memoNo) + '</td>' +
         '<td class="col-date">' + escapeHtml(l.date) + '</td>' +
         '<td class="col-date">' + escapeHtml(l.timeLine) + '</td>' +
         '<td class="col-status">' + statusBadge(l) + '</td>' +
-        '<td class="col-responded">' + escapeHtml(l.respondedMemo) + '</td>' +
-        '<td class="col-actions"><button class="row-link" data-edit="' + l.row + '" data-month="' + escapeHtml(l.month) + '">Edit</button></td>' +
+        '<td class="col-responded">' + respondedOutput + '</td>' +
+        '<td class="col-actions"><button class="row-link" data-edit="' + l.row + '" data-month="' + escapeHtml(l.month) + '">Edit Data</button></td>' +
         '</tr>';
     }).join('');
 
@@ -279,7 +296,7 @@
     localStorage.setItem('ilr_url', cfg.webAppUrl);
     localStorage.setItem('ilr_key', cfg.apiKey);
     settingsModal.close();
-    toast('Connecting…');
+    toast('Connecting...');
     refreshAll().then(function () { toast('Connected', 'ok'); })
       .catch(function (err) { setConnected(false); toast('Connection failed: ' + err.message, 'error'); });
   });
