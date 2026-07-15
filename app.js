@@ -3,10 +3,11 @@
 
   // ---------------------------------------------------------------
   // Connection config
+  // Read URL from config.js directly, Key from local storage
   // ---------------------------------------------------------------
   var cfg = {
-    webAppUrl: localStorage.getItem('ilr_url') || (window.DEFAULT_CONFIG && window.DEFAULT_CONFIG.webAppUrl) || '',
-    apiKey: localStorage.getItem('ilr_key') || (window.DEFAULT_CONFIG && window.DEFAULT_CONFIG.apiKey) || ''
+    webAppUrl: window.DEFAULT_CONFIG ? window.DEFAULT_CONFIG.webAppUrl : '',
+    apiKey: localStorage.getItem('ilr_key') || ''
   };
 
   var state = {
@@ -24,15 +25,13 @@
   var connDot = $('conn-status');
 
   var letterModal = $('letter-modal');
-  var settingsModal = $('settings-modal');
 
   // ---------------------------------------------------------------
   // API helper
   // ---------------------------------------------------------------
   function api(action, params, isWrite) {
     if (!cfg.webAppUrl || !cfg.apiKey) {
-      openSettings();
-      return Promise.reject(new Error('Not connected yet'));
+      return Promise.reject(new Error('Missing credentials'));
     }
     params = params || {};
     params.action = action;
@@ -96,11 +95,9 @@
   // ---------------------------------------------------------------
   function parseLinks(text) {
     var str = escapeHtml(text);
-    // Catches https://, http://, and links starting directly with www.
     var urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
     
     return str.replace(urlRegex, function(url) {
-      // Ensure absolute path formatting for anchor tags
       var href = url.startsWith('www.') ? 'https://' + url : url;
       var label = 'View Link';
       
@@ -155,7 +152,6 @@
       return;
     }
     
-    // Applying parseLinks() to all fields that might contain URLs
     ledgerBody.innerHTML = letters.map(function (l) {
       var subjectOutput = parseLinks(l.subject);
       var respondedOutput = parseLinks(l.respondedMemo);
@@ -230,6 +226,51 @@
   }
 
   // ---------------------------------------------------------------
+  // Login Flow
+  // ---------------------------------------------------------------
+  var loginScreen = $('login-screen');
+
+  function showLogin() {
+    document.body.style.overflow = 'hidden';
+    loginScreen.hidden = false;
+    if ($('login-key')) $('login-key').value = cfg.apiKey;
+  }
+
+  function hideLogin() {
+    document.body.style.overflow = 'auto';
+    loginScreen.hidden = true;
+  }
+
+  $('logout-btn').addEventListener('click', function() {
+      localStorage.removeItem('ilr_key');
+      cfg.apiKey = '';
+      setConnected(false);
+      showLogin();
+      toast('Logged out successfully.');
+  });
+
+  $('login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!cfg.webAppUrl) {
+        toast('Configuration Error: Web App URL is missing in config.js', 'error');
+        return;
+    }
+    
+    cfg.apiKey = $('login-key').value.trim();
+    localStorage.setItem('ilr_key', cfg.apiKey);
+    
+    toast('Authenticating...');
+    
+    refreshAll().then(function () { 
+      toast('Login Successful', 'ok'); 
+      hideLogin();
+    }).catch(function (err) { 
+      setConnected(false); 
+      toast('Authentication failed. Check your token.', 'error'); 
+    });
+  });
+
+  // ---------------------------------------------------------------
   // Letter modal
   // ---------------------------------------------------------------
   var fields = ['slNo', 'subject', 'memoNo', 'date', 'timeLine', 'respondedMemo', 'respondedThrough', 'status', 'remarks'];
@@ -284,29 +325,6 @@
   });
 
   // ---------------------------------------------------------------
-  // Settings modal
-  // ---------------------------------------------------------------
-  function openSettings() {
-    $('s-url').value = cfg.webAppUrl;
-    $('s-key').value = cfg.apiKey;
-    settingsModal.showModal();
-  }
-  $('settings-btn').addEventListener('click', openSettings);
-  $('settings-cancel').addEventListener('click', function () { settingsModal.close(); });
-
-  $('settings-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    cfg.webAppUrl = $('s-url').value.trim();
-    cfg.apiKey = $('s-key').value.trim();
-    localStorage.setItem('ilr_url', cfg.webAppUrl);
-    localStorage.setItem('ilr_key', cfg.apiKey);
-    settingsModal.close();
-    toast('Connecting...');
-    refreshAll().then(function () { toast('Connected', 'ok'); })
-      .catch(function (err) { setConnected(false); toast('Connection failed: ' + err.message, 'error'); });
-  });
-
-  // ---------------------------------------------------------------
   // Toolbar events
   // ---------------------------------------------------------------
   monthSelect.addEventListener('change', function () {
@@ -342,9 +360,10 @@
   if (cfg.webAppUrl && cfg.apiKey) {
     refreshAll().catch(function (err) {
       setConnected(false);
-      toast('Could not connect: ' + err.message, 'error');
+      showLogin(); 
+      toast('Session expired or invalid. Please log in again.', 'error');
     });
   } else {
-    setTimeout(openSettings, 400);
+    showLogin();
   }
 })();
