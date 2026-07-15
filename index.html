@@ -34,9 +34,13 @@
 
 <div class="register">
   <header class="masthead">
-    <div class="masthead__title">
-      <h1>Incoming Letter Register</h1>
-      <p class="masthead__sub">Dak &amp; correspondence tracker · <span id="year-label">2026</span></p>
+    <div class="brand-container">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/fe/Seal_of_Odisha.png" alt="Govt of Odisha Logo" class="brand-logo">
+      <div class="masthead__title">
+        <p class="dept-title">Forest, Environment and Climate Change Department, Govt of Odisha</p>
+        <h1 style="margin: 2px 0;">Forest Range Office, Kodinga Range</h1>
+        <p class="masthead__sub">Incoming Letter Register · <span id="year-label">2026</span></p>
+      </div>
     </div>
     <div class="masthead__actions">
       <span id="conn-status" class="conn-dot conn-dot--off" title="Not connected"></span>
@@ -60,7 +64,11 @@
     </div>
     <div class="stamp-card stamp-card--total">
       <span class="stamp-card__num" id="count-total">–</span>
-      <span class="stamp-card__label">Total this month</span>
+      <span class="stamp-card__label">Total Mails</span>
+    </div>
+    <div class="stamp-card" style="background-color: var(--brand-light);">
+      <span class="stamp-card__num" id="count-rate" style="color: var(--brand-primary);">–%</span>
+      <span class="stamp-card__label">Clearance Rate</span>
     </div>
   </section>
 
@@ -81,6 +89,12 @@
         <option value="Responded">Responded</option>
       </select>
     </label>
+    <div>
+      <button id="export-btn" class="btn btn--ghost" style="height: 100%;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Export PDF
+      </button>
+    </div>
   </section>
 
   <section class="ledger-wrap">
@@ -104,7 +118,7 @@
   </section>
 
   <footer class="foot-note">
-    <p>Data lives securely in your private Google Sheet. Every read and write goes through your own API.</p>
+    <p>Official correspondence tracking system. Managed by Forest Range Office, Kodinga Range.</p>
   </footer>
 </div>
 
@@ -128,9 +142,9 @@
       <label class="field"><span class="field__label">Memo No.</span>
         <input id="f-memoNo" type="text"></label>
       <label class="field"><span class="field__label">Date</span>
-        <input id="f-date" type="text" placeholder="dd/mm/yyyy"></label>
+        <input id="f-date" type="date"></label>
       <label class="field"><span class="field__label">Time Line (due)</span>
-        <input id="f-timeLine" type="text" placeholder="dd/mm/yyyy"></label>
+        <input id="f-timeLine" type="date"></label>
       <label class="field"><span class="field__label">Responded through</span>
         <input id="f-respondedThrough" type="text"></label>
       <label class="field field--full"><span class="field__label">Responded with Memo No &amp; Date</span>
