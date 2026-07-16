@@ -122,7 +122,7 @@ body {
 /* ---------- Summary Cards ---------- */
 .summary {
   display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px; 
   margin-bottom: 24px;
 }
@@ -132,10 +132,12 @@ body {
   padding: 20px; display: flex; flex-direction: column;
 }
 .stamp-card__num { font-size: 2rem; font-weight: 700; line-height: 1; margin-bottom: 8px; }
-.stamp-card__label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: var(--text-secondary); }
+.stamp-card__label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; color: var(--text-secondary); }
+
 .stamp-card--pending .stamp-card__num { color: var(--warning); }
 .stamp-card--overdue .stamp-card__num { color: var(--danger); }
 .stamp-card--responded .stamp-card__num { color: var(--success); }
+.stamp-card--communicated .stamp-card__num { color: var(--brand-primary); }
 .stamp-card--total .stamp-card__num { color: var(--text-primary); }
 
 /* ---------- Toolbar ---------- */
@@ -186,6 +188,7 @@ table.ledger { width: 100%; border-collapse: collapse; min-width: 1000px; text-a
 .status-stamp--pending { color: var(--warning); background: var(--warning-light); }
 .status-stamp--overdue { color: var(--danger); background: var(--danger-light); }
 .status-stamp--responded { color: var(--success); background: var(--success-light); }
+.status-stamp--communicated { color: var(--brand-primary); background: var(--brand-light); }
 
 .row-link {
   background: none; border: 1px solid var(--border-color); border-radius: var(--radius-md);
