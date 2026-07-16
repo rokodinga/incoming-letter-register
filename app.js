@@ -112,14 +112,34 @@
     return str.replace(urlRegex, function(url) {
       var href = url.startsWith('www.') ? 'https://' + url : url;
       var label = 'View Link';
+      var isGmail = url.indexOf('mail.google.com') !== -1;
       
-      if (url.indexOf('drive.google') !== -1) label = 'Google Drive';
-      else if (url.indexOf('docs.google') !== -1) label = 'Docs/Sheets';
-      else if (url.indexOf('.pdf') !== -1) label = 'PDF File';
+      // Default external link icon
+      var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
       
-      return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="link-badge">' +
-             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> ' + 
-             label + '</a>';
+      if (isGmail) {
+        label = 'View in Gmail';
+        // Mail envelope icon
+        icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>';
+      } else if (url.indexOf('drive.google') !== -1) {
+        label = 'Google Drive';
+      } else if (url.indexOf('docs.google') !== -1) {
+        label = 'Docs/Sheets';
+      } else if (url.indexOf('.pdf') !== -1) {
+        label = 'PDF File';
+      }
+      
+      // If it is a Gmail link, apply a custom Google Red styling badge
+      if (isGmail) {
+        return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="link-badge" ' +
+               'style="background-color: #fce8e6; color: #ea4335;" ' +
+               'onmouseover="this.style.backgroundColor=\'#ea4335\'; this.style.color=\'#ffffff\'" ' +
+               'onmouseout="this.style.backgroundColor=\'#fce8e6\'; this.style.color=\'#ea4335\'">' + 
+               icon + ' ' + label + '</a>';
+      }
+      
+      // Standard brand-colored badge for all other links
+      return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="link-badge">' + icon + ' ' + label + '</a>';
     });
   }
 
@@ -421,4 +441,3 @@
     showLogin();
   }
 })();
-
