@@ -141,19 +141,22 @@
     var pending = letters.filter(function (l) { return l.status === 'Pending' && !isOverdue(l); }).length;
     var overdue = letters.filter(isOverdue).length;
     var responded = letters.filter(function (l) { return l.status === 'Responded'; }).length;
+    var communicated = letters.filter(function (l) { return l.status === 'Communicated'; }).length;
     
     $('count-pending').textContent = pending;
     $('count-overdue').textContent = overdue;
     $('count-responded').textContent = responded;
+    $('count-communicated').textContent = communicated;
     $('count-total').textContent = total;
 
-    // Advanced Analytic: Clearance Rate
-    var rate = total === 0 ? 0 : Math.round((responded / total) * 100);
+    // Advanced Analytic: Clearance Rate treats both Responded and Communicated as cleared
+    var rate = total === 0 ? 0 : Math.round(((responded + communicated) / total) * 100);
     $('count-rate').textContent = rate + '%';
   }
 
   function statusBadge(letter) {
     if (isOverdue(letter)) return '<span class="status-stamp status-stamp--overdue">Overdue</span>';
+    if (letter.status === 'Communicated') return '<span class="status-stamp status-stamp--communicated">Communicated</span>';
     if (letter.status === 'Responded') return '<span class="status-stamp status-stamp--responded">Responded</span>';
     return '<span class="status-stamp status-stamp--pending">Pending</span>';
   }
@@ -172,8 +175,18 @@
     
     ledgerBody.innerHTML = letters.map(function (l) {
       var subjectOutput = parseLinks(l.subject);
-      var respondedOutput = parseLinks(l.respondedMemo);
       var memoOutput = parseLinks(l.memoNo);
+      
+      // Combine Memo & Date with Responded Through for visibility
+      var respondedMemoOutput = parseLinks(l.respondedMemo);
+      var respondedThroughOutput = escapeHtml(l.respondedThrough);
+      var respondedDisplay = '';
+      if (respondedMemoOutput) {
+          respondedDisplay += '<div style="font-size:0.9em; margin-bottom:4px;"><b>Memo:</b> ' + respondedMemoOutput + '</div>';
+      }
+      if (respondedThroughOutput) {
+          respondedDisplay += '<div style="font-size:0.9em; color:var(--text-secondary);"><b>Via:</b> ' + respondedThroughOutput + '</div>';
+      }
       
       return '<tr>' +
         '<td class="col-sl"><span class="sl-badge">' + escapeHtml(l.slNo) + '</span></td>' +
@@ -182,7 +195,7 @@
         '<td class="col-date">' + escapeHtml(l.date) + '</td>' +
         '<td class="col-date">' + escapeHtml(l.timeLine) + '</td>' +
         '<td class="col-status">' + statusBadge(l) + '</td>' +
-        '<td class="col-responded">' + respondedOutput + '</td>' +
+        '<td class="col-responded">' + respondedDisplay + '</td>' +
         '<td class="col-actions"><button class="row-link" data-edit="' + l.row + '" data-month="' + escapeHtml(l.month) + '">Edit Data</button></td>' +
         '</tr>';
     }).join('');
@@ -325,8 +338,6 @@
     
     fields.forEach(function (f) {
       var el = $('f-' + f);
-      // For date fields, we might need to convert YYYY-MM-DD back to DD/MM/YYYY if Apps Script expects it
-      // Standardizing on string is fine, apps script formats it on arrival.
       if (el.type === 'date' && el.value) {
           var parts = el.value.split('-');
           data[f] = parts[2] + '/' + parts[1] + '/' + parts[0]; 
@@ -410,3 +421,4 @@
     showLogin();
   }
 })();
+
