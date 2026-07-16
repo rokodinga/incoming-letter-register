@@ -70,7 +70,6 @@
     var parts = String(s).split(/[\/\-]/);
     if (parts.length !== 3) return null;
     
-    // Support YYYY-MM-DD (HTML5) or DD/MM/YYYY (Legacy)
     if (parts[0].length === 4) {
       return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
     } else {
@@ -107,20 +106,25 @@
   // ---------------------------------------------------------------
   function parseLinks(text) {
     var str = escapeHtml(text);
-    var urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+    // Upgraded Regex: Catches mail.google.com and gmail.com even if https:// is missing
+    var urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|mail\.google\.com[^\s]+|gmail\.com[^\s]+)/g;
     
     return str.replace(urlRegex, function(url) {
-      var href = url.startsWith('www.') ? 'https://' + url : url;
-      var label = 'View Link';
-      var isGmail = url.indexOf('mail.google.com') !== -1;
+      var href = url;
+      // Auto-add https:// if it was forgotten
+      if (!href.startsWith('http')) {
+          href = 'https://' + href;
+      }
       
-      // Default external link icon
-      var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
+      var label = 'View Link';
+      var isGmail = url.indexOf('mail.google.com') !== -1 || url.indexOf('gmail.com') !== -1;
+      
+      // Default icon
+      var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:2px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>';
       
       if (isGmail) {
         label = 'View in Gmail';
-        // Mail envelope icon
-        icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>';
+        icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:2px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>';
       } else if (url.indexOf('drive.google') !== -1) {
         label = 'Google Drive';
       } else if (url.indexOf('docs.google') !== -1) {
@@ -129,17 +133,16 @@
         label = 'PDF File';
       }
       
-      // If it is a Gmail link, apply a custom Google Red styling badge
+      // Custom Red Badge for Gmail
       if (isGmail) {
         return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="link-badge" ' +
                'style="background-color: #fce8e6; color: #ea4335;" ' +
                'onmouseover="this.style.backgroundColor=\'#ea4335\'; this.style.color=\'#ffffff\'" ' +
                'onmouseout="this.style.backgroundColor=\'#fce8e6\'; this.style.color=\'#ea4335\'">' + 
-               icon + ' ' + label + '</a>';
+               icon + label + '</a>';
       }
       
-      // Standard brand-colored badge for all other links
-      return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="link-badge">' + icon + ' ' + label + '</a>';
+      return '<a href="' + href + '" target="_blank" rel="noopener noreferrer" class="link-badge">' + icon + label + '</a>';
     });
   }
 
@@ -169,7 +172,6 @@
     $('count-communicated').textContent = communicated;
     $('count-total').textContent = total;
 
-    // Advanced Analytic: Clearance Rate treats both Responded and Communicated as cleared
     var rate = total === 0 ? 0 : Math.round(((responded + communicated) / total) * 100);
     $('count-rate').textContent = rate + '%';
   }
@@ -197,7 +199,6 @@
       var subjectOutput = parseLinks(l.subject);
       var memoOutput = parseLinks(l.memoNo);
       
-      // Combine Memo & Date with Responded Through for visibility
       var respondedMemoOutput = parseLinks(l.respondedMemo);
       var respondedThroughOutput = escapeHtml(l.respondedThrough);
       var respondedDisplay = '';
@@ -337,7 +338,6 @@
       var el = $('f-' + f);
       if (!el) return;
       var val = isEdit ? (letter[f] || '') : (f === 'status' ? 'Pending' : '');
-      // If the field is a date input, format it appropriately for HTML5
       if (el.type === 'date' && val) {
         el.value = formatForInput(val);
       } else {
