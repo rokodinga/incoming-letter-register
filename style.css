@@ -180,12 +180,17 @@ table.ledger { width: 100%; border-collapse: separate; border-spacing: 0; min-wi
 
 /* --- Auth Module --- */
 .login-screen {
-  border: none; position: fixed; inset: 0; width: 100vw; height: 100vh; background-color: #0f172a; 
+  border: none; position: fixed; inset: 0; width: 100vw; height: 100dvh; background-color: #0f172a; 
   background-image: linear-gradient(rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.95)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a5d?q=80&w=2070&auto=format&fit=crop');
-  background-position: center; background-size: cover; display: flex; align-items: center; justify-content: center; z-index: 200; padding: 16px;
+  background-position: center; background-size: cover; 
+  display: flex; align-items: center; justify-content: center; 
+  z-index: 200; padding: 16px;
+  overflow-y: auto; /* Bulletproof against virtual keyboards */
 }
 .login-card {
-  background: var(--surface); width: 100%; max-width: 420px; padding: 48px 32px; border-radius: var(--radius-lg); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+  background: var(--surface); width: 100%; max-width: 420px; padding: 48px 32px; 
+  border-radius: var(--radius-lg); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+  margin: auto; /* Maintains safe centering during viewport collapse */
 }
 .login-header { text-align: center; margin-bottom: 32px; }
 .login-header h2 { font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin: 16px 0 8px 0; }
