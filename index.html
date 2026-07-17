@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CRITICAL: This mathematically forces mobile browsers to render at actual device width, preventing the "zoomed out" bug -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>E-Register | Kodinga Range</title>
-  <link rel="stylesheet" href="style.css?v=2.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -29,15 +30,14 @@
 <!-- App Shell -->
 <div class="app-container">
   
-  <!-- Main Content (Now Full Width) -->
   <div class="main-wrapper">
     
-    <!-- Top Navigation -->
+    <!-- Top Navigation (Fluid) -->
     <header class="topbar">
       <div class="topbar__left">
         <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="topbar__logo">
         <div class="topbar__titles">
-          <span class="topbar__dept">Forest & Environment Dept, Odisha</span>
+          <span class="topbar__dept">Forest, Environment & Climate Change Dept, Govt of Odisha</span>
           <span class="topbar__office">Incoming Letters · <span id="year-label">2026</span></span>
         </div>
       </div>
@@ -67,11 +67,11 @@
           <span class="stat-card__num" id="count-responded" style="color: var(--success);">–</span>
         </div>
         <div class="stat-card">
-          <span class="stat-card__label">Communicated/Intimated</span>
+          <span class="stat-card__label">Communicated</span>
           <span class="stat-card__num" id="count-communicated" style="color: var(--info);">–</span>
         </div>
         <div class="stat-card stat-card--accent">
-          <span class="stat-card__label">Clearance Efficiency</span>
+          <span class="stat-card__label">Efficiency</span>
           <span class="stat-card__num" id="count-rate">–%</span>
         </div>
       </section>
@@ -96,7 +96,7 @@
           </select>
         </label>
         <div>
-          <button id="export-btn" class="btn btn--ghost" style="height: 100%;">Export Report</button>
+          <button id="export-btn" class="btn btn--ghost" style="height: 100%;">Export PDF</button>
         </div>
       </section>
 
@@ -140,6 +140,7 @@
       <input type="hidden" id="f-row">
       <input type="hidden" id="f-month">
       
+      <!-- Fluid Grid: Automatically stacks on mobile, side-by-side on desktop -->
       <div class="drawer-grid">
         <label class="field"><span class="field__label">SL Number</span>
           <input id="f-slNo" type="text" placeholder="Auto"></label>
@@ -167,7 +168,7 @@
     </div>
 
     <div class="drawer__footer">
-      <button type="button" class="btn btn--danger" id="modal-delete" style="margin-right: auto;" hidden>Delete Entry</button>
+      <button type="button" class="btn btn--danger" id="modal-delete" style="margin-right: auto;" hidden>Delete</button>
       <button type="button" class="btn btn--ghost" id="drawer-cancel-btn">Cancel</button>
       <button type="submit" class="btn btn--primary" id="modal-save">Commit Record</button>
     </div>
