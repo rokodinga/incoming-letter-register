@@ -279,7 +279,8 @@
   getEl('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('ilr_key'); state.apiKey = '';
     els.conn.className = 'conn-dot'; secureWipe();
-    els.shell.hidden = true; els.login.showModal();
+    els.shell.hidden = true; 
+    els.login.hidden = false; 
     showToast('Secure session terminated');
   });
 
@@ -292,7 +293,8 @@
     try {
       await syncDatabase();
       localStorage.setItem('ilr_key', state.apiKey);
-      els.login.close(); els.shell.hidden = false;
+      els.login.hidden = true; 
+      els.shell.hidden = false;
       showToast('Access Granted', 'ok');
     } catch (err) {
       showToast('Access Denied: Invalid Token', 'error');
@@ -305,9 +307,15 @@
   // Initialization Sequence
   if (window.DEFAULT_CONFIG?.webAppUrl && state.apiKey) {
     syncDatabase()
-      .then(() => { els.login.close(); els.shell.hidden = false; })
-      .catch(() => { secureWipe(); els.login.showModal(); });
+      .then(() => { 
+        els.login.hidden = true; 
+        els.shell.hidden = false; 
+      })
+      .catch(() => { 
+        secureWipe(); 
+        els.login.hidden = false; 
+      });
   } else {
-    els.login.showModal();
+    els.login.hidden = false; 
   }
 })();
