@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Critical fix: Ensures hidden elements disappear completely */
 [hidden] { 
   display: none !important; 
 }
@@ -45,10 +44,9 @@ body {
   background-color: var(--bg-app);
   color: var(--text-main);
   line-height: 1.5;
-  overflow: hidden; /* App shell prevents body scroll */
+  overflow: hidden; 
 }
 
-/* ---------- App Shell Layout ---------- */
 .app-container {
   display: flex;
   height: 100vh;
@@ -56,53 +54,6 @@ body {
   overflow: hidden;
 }
 
-/* Sidebar */
-.sidebar {
-  width: 260px;
-  background-color: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  transition: var(--transition);
-  z-index: 40;
-}
-.sidebar__header {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--border);
-  gap: 12px;
-}
-.sidebar__logo { width: 32px; height: 32px; border-radius: 50%; }
-.sidebar__title { font-weight: 700; font-size: 1rem; color: var(--primary); letter-spacing: -0.02em; }
-
-.sidebar__nav {
-  padding: 20px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: var(--transition);
-}
-.nav-item:hover, .nav-item.active {
-  background-color: #f0fdf4;
-  color: var(--primary);
-}
-.nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
-
-/* Main Content Area */
 .main-wrapper {
   flex: 1;
   display: flex;
@@ -110,9 +61,9 @@ body {
   overflow: hidden;
 }
 
-/* Top Navigation */
+/* ---------- Top Navigation ---------- */
 .topbar {
-  height: 64px;
+  height: 72px;
   background-color: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -121,9 +72,24 @@ body {
   padding: 0 24px;
   z-index: 30;
 }
-.topbar__left { display: flex; flex-direction: column; }
-.topbar__dept { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-.topbar__office { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
+.topbar__left { 
+  display: flex; 
+  align-items: center;
+  gap: 16px; 
+}
+.topbar__logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: contain;
+}
+.topbar__titles { 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center;
+}
+.topbar__dept { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;}
+.topbar__office { font-size: 1.15rem; font-weight: 700; color: var(--primary); }
 
 .topbar__right { display: flex; align-items: center; gap: 20px; }
 .live-clock { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); background: var(--bg-app); padding: 6px 12px; border-radius: var(--radius-lg); }
@@ -266,7 +232,7 @@ table.ledger { width: 100%; border-collapse: separate; border-spacing: 0; min-wi
 /* ---------- Premium Login Screen ---------- */
 .login-screen {
   position: fixed; inset: 0;
-  background-color: #0f172a; /* Solid fallback to block visibility */
+  background-color: #0f172a; 
   background-image: linear-gradient(rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.98)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a5d?q=80&w=2070&auto=format&fit=crop');
   background-position: center;
   background-size: cover;
@@ -296,7 +262,7 @@ table.ledger { width: 100%; border-collapse: separate; border-spacing: 0; min-wi
 .toast--ok { background: var(--primary); }
 
 @media print {
-  .sidebar, .topbar, .toolbar, .summary-grid, .drawer, .drawer-overlay, .login-screen { display: none !important; }
+  .topbar, .toolbar, .summary-grid, .drawer, .drawer-overlay, .login-screen { display: none !important; }
   .main-wrapper { overflow: visible; height: auto; }
   .table-container { box-shadow: none; max-height: none; overflow: visible; border: none; }
   table.ledger { width: 100%; border: 1px solid #000; }
