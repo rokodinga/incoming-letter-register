@@ -10,11 +10,10 @@
 
 <!-- Full Screen Login Gate -->
 <div id="login-screen" class="login-overlay" hidden>
-  <div class="login-card">
+  <div class="login-card glass-panel">
     <div class="login-header">
       <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="brand-logo" style="margin-bottom: 16px; width: 65px;">
       <h2>System Login</h2>
-      <p>Forest Range Office Kodinga</p>
       <p>Enter your access token to view the register.</p>
     </div>
     
@@ -31,7 +30,7 @@
 </div>
 
 <div class="register">
-  <!-- Header / Masthead with Official Branding -->
+  <!-- Header / Masthead -->
   <header class="masthead">
     <div class="brand-container">
       <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="brand-logo">
@@ -50,34 +49,34 @@
 
   <!-- Summary Cards -->
   <section class="summary" id="summary-cards" aria-label="Summary">
-    <div class="stamp-card stamp-card--pending">
+    <div class="stamp-card glass-panel stamp-card--pending">
       <span class="stamp-card__num" id="count-pending">–</span>
       <span class="stamp-card__label">Pending</span>
     </div>
-    <div class="stamp-card stamp-card--overdue">
+    <div class="stamp-card glass-panel stamp-card--overdue">
       <span class="stamp-card__num" id="count-overdue">–</span>
       <span class="stamp-card__label">Overdue</span>
     </div>
-    <div class="stamp-card stamp-card--responded">
+    <div class="stamp-card glass-panel stamp-card--responded">
       <span class="stamp-card__num" id="count-responded">–</span>
       <span class="stamp-card__label">Responded</span>
     </div>
-    <div class="stamp-card stamp-card--communicated">
+    <div class="stamp-card glass-panel stamp-card--communicated">
       <span class="stamp-card__num" id="count-communicated">–</span>
       <span class="stamp-card__label">Communicated</span>
     </div>
-    <div class="stamp-card stamp-card--total">
+    <div class="stamp-card glass-panel stamp-card--total">
       <span class="stamp-card__num" id="count-total">–</span>
       <span class="stamp-card__label">Total Mails</span>
     </div>
-    <div class="stamp-card" style="background-color: var(--brand-light);">
-      <span class="stamp-card__num" id="count-rate" style="color: var(--brand-primary);">–%</span>
-      <span class="stamp-card__label">Clearance Rate</span>
+    <div class="stamp-card glass-panel" style="background-color: rgba(255,255,255,0.2);">
+      <span class="stamp-card__num" id="count-rate" style="color: #ffffff;">–%</span>
+      <span class="stamp-card__label" style="color: rgba(255,255,255,0.8);">Clearance Rate</span>
     </div>
   </section>
 
-  <!-- Dashboard Controls with PDF Export -->
-  <section class="toolbar">
+  <!-- Dashboard Controls -->
+  <section class="toolbar glass-panel">
     <label class="field">
       <span class="field__label">Month Partition</span>
       <select id="month-select"></select>
@@ -89,7 +88,7 @@
     <label class="field">
       <span class="field__label">Status Filter</span>
       <select id="status-filter">
-        <option value="">All Status</option>
+        <option value="">All Statuses</option>
         <option value="Pending">Pending</option>
         <option value="Responded">Responded</option>
         <option value="Communicated">Communicated</option>
@@ -104,7 +103,7 @@
   </section>
 
   <!-- Table -->
-  <section class="ledger-wrap">
+  <section class="ledger-wrap glass-panel">
     <table class="ledger" id="ledger-table">
       <thead>
         <tr>
@@ -125,12 +124,12 @@
   </section>
 
   <footer class="foot-note">
-    <p>Official correspondence tracking system. Managed by Forest Range Office, Kodinga Range. Designed and Developed By Narasing Patra DEO</p>
+    <p>Official correspondence tracking system. Managed by Forest Range Office, Kodinga Range.</p>
   </footer>
 </div>
 
 <!-- Letter Add/Edit Modal -->
-<dialog id="letter-modal" class="modal">
+<dialog id="letter-modal" class="modal glass-panel">
   <form id="letter-form" method="dialog">
     <h2 id="modal-title">New letter</h2>
     <p class="modal-help">Fill in the details for the incoming correspondence.</p>
