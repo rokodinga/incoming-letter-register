@@ -29,28 +29,17 @@
 <!-- App Shell -->
 <div class="app-container">
   
-  <!-- Left Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar__header">
-      <img src="govtodisha-logo.png" alt="Logo" class="sidebar__logo">
-      <span class="sidebar__title">eRegister</span>
-    </div>
-    <nav class="sidebar__nav">
-      <a href="#" class="nav-item active">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-        Dashboard
-      </a>
-    </nav>
-  </aside>
-
-  <!-- Main Content -->
+  <!-- Main Content (Now Full Width) -->
   <div class="main-wrapper">
     
     <!-- Top Navigation -->
     <header class="topbar">
       <div class="topbar__left">
-        <span class="topbar__dept">Forest & Environment Dept, Odisha</span>
-        <span class="topbar__office">Incoming Letters · <span id="year-label">2026</span></span>
+        <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="topbar__logo">
+        <div class="topbar__titles">
+          <span class="topbar__dept">Forest & Environment Dept, Odisha</span>
+          <span class="topbar__office">Incoming Letters · <span id="year-label">2026</span></span>
+        </div>
       </div>
       <div class="topbar__right">
         <div id="live-clock" class="live-clock">--:--:--</div>
@@ -136,7 +125,7 @@
   </div>
 </div>
 
-<!-- Side Drawer (Replaces Modal) -->
+<!-- Side Drawer -->
 <div id="drawer-overlay" class="drawer-overlay"></div>
 <aside id="letter-drawer" class="drawer">
   <form id="letter-form" style="display: flex; flex-direction: column; height: 100%;">
