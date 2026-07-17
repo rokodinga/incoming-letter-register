@@ -162,7 +162,7 @@
     connDot.className = 'conn-dot ' + (on ? 'conn-dot--on' : 'conn-dot--off');
   }
 
-  // Drawer Controller (Replaces Modal logic)
+  // Drawer Controller
   function openDrawer(letter) {
     var isEdit = !!letter;
     $('modal-title').textContent = isEdit ? 'Update Entry #' + letter.slNo : 'Register New Dak';
@@ -200,7 +200,7 @@
       if (!res.ok) return toast('Error: ' + res.error, 'error');
       toast(row ? 'Record Updated' : 'Record Registered', 'ok');
       closeDrawer();
-      if (month === state.currentMonth) refreshAll(); // Simpler refresh for sync
+      if (month === state.currentMonth) refreshAll();
     });
   });
 
@@ -214,8 +214,28 @@
     }
   });
 
+  // Security Helper: Wipes the UI clean
+  function clearData() {
+    state.letters = [];
+    state.searchResults = [];
+    ledgerBody.innerHTML = '<tr><td colspan="8" class="empty-row">Authenticate to synchronize database.</td></tr>';
+    $('count-pending').textContent = '–';
+    $('count-overdue').textContent = '–';
+    $('count-responded').textContent = '–';
+    $('count-communicated').textContent = '–';
+    $('count-rate').textContent = '–%';
+  }
+
   // Login & Toolbar Events
-  $('logout-btn').addEventListener('click', function() { localStorage.removeItem('ilr_key'); cfg.apiKey = ''; setConnected(false); $('login-screen').hidden = false; toast('Session Ended'); });
+  $('logout-btn').addEventListener('click', function() { 
+    localStorage.removeItem('ilr_key'); 
+    cfg.apiKey = ''; 
+    setConnected(false); 
+    clearData(); // Instantly wipes the data from the screen
+    $('login-screen').hidden = false; 
+    toast('Session Ended'); 
+  });
+  
   $('login-form').addEventListener('submit', function (e) {
     e.preventDefault(); cfg.apiKey = $('login-key').value.trim(); localStorage.setItem('ilr_key', cfg.apiKey);
     toast('Authenticating Securely...');
@@ -240,7 +260,7 @@
   // Critical Update: Corrected Auto-Login Bootstrapper
   if (cfg.webAppUrl && cfg.apiKey) {
     refreshAll().then(function() {
-      $('login-screen').hidden = true; // explicitly hide the screen upon successful auto-login
+      $('login-screen').hidden = true; 
     }).catch(function () { 
       setConnected(false); 
       $('login-screen').hidden = false; 
