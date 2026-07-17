@@ -266,7 +266,10 @@ table.ledger { width: 100%; border-collapse: separate; border-spacing: 0; min-wi
 /* ---------- Premium Login Screen ---------- */
 .login-screen {
   position: fixed; inset: 0;
-  background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a5d?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+  background-color: #0f172a; /* Solid fallback to block visibility */
+  background-image: linear-gradient(rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.98)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a5d?q=80&w=2070&auto=format&fit=crop');
+  background-position: center;
+  background-size: cover;
   display: flex; align-items: center; justify-content: center; z-index: 200;
 }
 .login-card {
