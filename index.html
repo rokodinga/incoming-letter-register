@@ -3,38 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<meta name="description" content="Incoming Letter Register for Forest Range Office Kodinga - Track and manage official correspondence.">
 <title>Incoming Letter Register 2026</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <!-- Full Screen Login Gate -->
-<div id="login-screen" class="login-overlay" hidden>
+<div id="login-screen" class="login-overlay" hidden role="dialog" aria-labelledby="login-title" aria-modal="true">
   <div class="login-card">
     <div class="login-header">
-      <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="brand-logo" style="margin-bottom: 16px; width: 65px;">
-      <h2>System Login</h2>
+      <img src="govtodisha-logo.png" alt="Government of Odisha Logo" class="brand-logo" style="margin-bottom: 16px; width: 65px;">
+      <h1 id="login-title">System Login</h1>
       <p>Forest Range Office Kodinga</p>
       <p>Enter your access token to view the register.</p>
     </div>
     
     <form id="login-form">
-      <div class="field" style="margin-bottom: 24px;">
-        <label class="field__label" for="login-key">Access Token</label>
-        <input id="login-key" type="password" placeholder="••••••••••••" required>
-      </div>
-      <button type="submit" class="btn btn--primary" style="width: 100%; padding: 12px; font-size: 1rem;">
+      <fieldset>
+        <legend class="sr-only">Login Credentials</legend>
+        <div class="field" style="margin-bottom: 24px;">
+          <label class="field__label" for="login-key">Access Token</label>
+          <input id="login-key" type="password" placeholder="••••••••••••" required aria-required="true" autocomplete="off">
+        </div>
+      </fieldset>
+      <button type="submit" class="btn btn--primary" style="width: 100%; padding: 12px; font-size: 1rem;" aria-label="Sign in to the dashboard">
         Sign In to Dashboard
       </button>
     </form>
   </div>
 </div>
 
-<div class="register">
+<main class="register" role="main">
   <!-- Header / Masthead with Official Branding -->
   <header class="masthead">
     <div class="brand-container">
-      <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="brand-logo">
+      <img src="govtodisha-logo.png" alt="Government of Odisha Logo" class="brand-logo">
       <div class="masthead__title">
         <p class="dept-title">Forest, Environment and Climate Change Department, Govt of Odisha</p>
         <h1 style="margin: 2px 0;">Forest Range Office, Kodinga Range</h1>
@@ -42,53 +47,55 @@
       </div>
     </div>
     <div class="masthead__actions">
-      <span id="conn-status" class="conn-dot conn-dot--off" title="Not connected"></span>
-      <button id="logout-btn" class="btn btn--ghost" type="button">Logout</button>
-      <button id="new-letter-btn" class="btn btn--primary" type="button">+ New Letter</button>
+      <span id="conn-status" class="conn-dot conn-dot--off" title="Connection status: Not connected" role="status" aria-live="polite" aria-label="System connection status"></span>
+      <button id="logout-btn" class="btn btn--ghost" type="button" aria-label="Logout from the system">Logout</button>
+      <button id="new-letter-btn" class="btn btn--primary" type="button" aria-label="Add a new incoming letter">+ New Letter</button>
     </div>
   </header>
 
   <!-- Summary Cards -->
-  <section class="summary" id="summary-cards" aria-label="Summary">
+  <section class="summary" id="summary-cards" aria-label="Letter Statistics Overview">
+    <h2 class="sr-only">Summary Statistics</h2>
     <div class="stamp-card stamp-card--pending">
-      <span class="stamp-card__num" id="count-pending">–</span>
+      <span class="stamp-card__num" id="count-pending" aria-label="Pending letters count">–</span>
       <span class="stamp-card__label">Pending</span>
     </div>
     <div class="stamp-card stamp-card--overdue">
-      <span class="stamp-card__num" id="count-overdue">–</span>
+      <span class="stamp-card__num" id="count-overdue" aria-label="Overdue letters count">–</span>
       <span class="stamp-card__label">Overdue</span>
     </div>
     <div class="stamp-card stamp-card--responded">
-      <span class="stamp-card__num" id="count-responded">–</span>
+      <span class="stamp-card__num" id="count-responded" aria-label="Responded letters count">–</span>
       <span class="stamp-card__label">Responded</span>
     </div>
     <div class="stamp-card stamp-card--communicated">
-      <span class="stamp-card__num" id="count-communicated">–</span>
+      <span class="stamp-card__num" id="count-communicated" aria-label="Communicated letters count">–</span>
       <span class="stamp-card__label">Communicated</span>
     </div>
     <div class="stamp-card stamp-card--total">
-      <span class="stamp-card__num" id="count-total">–</span>
+      <span class="stamp-card__num" id="count-total" aria-label="Total letters count">–</span>
       <span class="stamp-card__label">Total Mails</span>
     </div>
     <div class="stamp-card" style="background-color: var(--brand-light);">
-      <span class="stamp-card__num" id="count-rate" style="color: var(--brand-primary);">–%</span>
+      <span class="stamp-card__num" id="count-rate" style="color: var(--brand-primary);" aria-label="Clearance rate percentage">–%</span>
       <span class="stamp-card__label">Clearance Rate</span>
     </div>
   </section>
 
   <!-- Dashboard Controls with PDF Export -->
-  <section class="toolbar">
+  <section class="toolbar" aria-label="Filters and Search Controls">
+    <h2 class="sr-only">Search and Filter Options</h2>
     <label class="field">
       <span class="field__label">Month Partition</span>
-      <select id="month-select"></select>
+      <select id="month-select" aria-label="Filter letters by month"></select>
     </label>
     <label class="field field--grow">
       <span class="field__label">Global Search</span>
-      <input id="search-input" type="text" placeholder="Search by subject, memo no. or date...">
+      <input id="search-input" type="text" placeholder="Search by subject, memo no. or date..." aria-label="Search letters by subject, memo number, or date">
     </label>
     <label class="field">
       <span class="field__label">Status Filter</span>
-      <select id="status-filter">
+      <select id="status-filter" aria-label="Filter letters by status">
         <option value="">All Status</option>
         <option value="Pending">Pending</option>
         <option value="Responded">Responded</option>
@@ -96,8 +103,8 @@
       </select>
     </label>
     <div>
-      <button id="export-btn" class="btn btn--ghost" style="height: 100%;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      <button id="export-btn" class="btn btn--ghost" style="height: 100%;" aria-label="Export the current letter list as PDF">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Export PDF
       </button>
     </div>
@@ -105,17 +112,18 @@
 
   <!-- Table -->
   <section class="ledger-wrap">
+    <h2 class="sr-only">Incoming Letters Register</h2>
     <table class="ledger" id="ledger-table">
       <thead>
         <tr>
-          <th class="col-sl">SL No</th>
-          <th class="col-subject">Subject</th>
-          <th class="col-memo">Memo No.</th>
-          <th class="col-date">Date</th>
-          <th class="col-date">Time Line</th>
-          <th class="col-status">Status</th>
-          <th class="col-responded">Action Taken / Data</th>
-          <th class="col-actions">Actions</th>
+          <th class="col-sl" scope="col">SL No</th>
+          <th class="col-subject" scope="col">Subject</th>
+          <th class="col-memo" scope="col">Memo No.</th>
+          <th class="col-date" scope="col">Date</th>
+          <th class="col-date" scope="col">Time Line</th>
+          <th class="col-status" scope="col">Status</th>
+          <th class="col-responded" scope="col">Action Taken / Data</th>
+          <th class="col-actions" scope="col">Actions</th>
         </tr>
       </thead>
       <tbody id="ledger-body">
@@ -127,7 +135,7 @@
   <footer class="foot-note">
     <p>Official correspondence tracking system. Managed by Forest Range Office, Kodinga Range. Designed and Developed By Narasing Patra DEO</p>
   </footer>
-</div>
+</main>
 
 <!-- Letter Add/Edit Modal -->
 <dialog id="letter-modal" class="modal">
@@ -139,40 +147,40 @@
 
     <div class="modal-grid">
       <label class="field"><span class="field__label">SL No</span>
-        <input id="f-slNo" type="text" placeholder="Auto-generated"></label>
+        <input id="f-slNo" type="text" placeholder="Auto-generated" aria-label="Serial number (auto-generated)"></label>
       <label class="field"><span class="field__label">Status</span>
-        <select id="f-status">
+        <select id="f-status" aria-label="Letter status">
           <option value="Pending">Pending</option>
           <option value="Responded">Responded</option>
           <option value="Communicated">Communicated</option>
         </select></label>
       <label class="field field--full"><span class="field__label">Subject (Include links here if needed)</span>
-        <textarea id="f-subject" rows="2" required></textarea></label>
+        <textarea id="f-subject" rows="2" required aria-label="Letter subject (required)" aria-required="true"></textarea></label>
       <label class="field"><span class="field__label">Memo No.</span>
-        <input id="f-memoNo" type="text"></label>
+        <input id="f-memoNo" type="text" aria-label="Memo number"></label>
       <label class="field"><span class="field__label">Date</span>
-        <input id="f-date" type="date"></label>
+        <input id="f-date" type="date" aria-label="Letter date"></label>
       <label class="field"><span class="field__label">Time Line (due)</span>
-        <input id="f-timeLine" type="date"></label>
+        <input id="f-timeLine" type="date" aria-label="Due date / timeline"></label>
       <label class="field"><span class="field__label">Responded through (e.g., Email, WhatsApp, Hard Copy)</span>
-        <input id="f-respondedThrough" type="text"></label>
+        <input id="f-respondedThrough" type="text" aria-label="Response method (e.g., Email, WhatsApp, Hard Copy)"></label>
       <label class="field"><span class="field__label">Responded with Memo No &amp; Date</span>
-        <input id="f-respondedMemo" type="text"></label>
+        <input id="f-respondedMemo" type="text" aria-label="Response memo number and date"></label>
       <label class="field field--full"><span class="field__label">Remarks / Document Links</span>
-        <textarea id="f-remarks" rows="2" placeholder="Paste drive links here..."></textarea></label>
+        <textarea id="f-remarks" rows="2" placeholder="Paste drive links here..." aria-label="Additional remarks or document links"></textarea></label>
     </div>
 
     <div class="modal-actions">
-      <button type="button" class="btn btn--danger" id="modal-delete" hidden>Delete</button>
-      <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
-      <button type="submit" class="btn btn--primary" id="modal-save">Save Letter</button>
+      <button type="button" class="btn btn--danger" id="modal-delete" hidden aria-label="Permanently delete this letter">Delete</button>
+      <button type="button" class="btn btn--ghost" id="modal-cancel" aria-label="Cancel and close the form">Cancel</button>
+      <button type="submit" class="btn btn--primary" id="modal-save" aria-label="Save the letter information">Save Letter</button>
     </div>
   </form>
 </dialog>
 
-<div id="toast" class="toast" hidden></div>
+<div id="toast" class="toast" hidden role="status" aria-live="polite" aria-atomic="true"></div>
 
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script src="config.js" defer></script>
+<script src="app.js" defer></script>
 </body>
 </html>
