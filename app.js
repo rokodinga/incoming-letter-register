@@ -237,7 +237,15 @@
     }, 350);
   });
 
+  // Critical Update: Corrected Auto-Login Bootstrapper
   if (cfg.webAppUrl && cfg.apiKey) {
-    refreshAll().catch(function () { setConnected(false); $('login-screen').hidden = false; });
-  } else $('login-screen').hidden = false;
+    refreshAll().then(function() {
+      $('login-screen').hidden = true; // explicitly hide the screen upon successful auto-login
+    }).catch(function () { 
+      setConnected(false); 
+      $('login-screen').hidden = false; 
+    });
+  } else {
+    $('login-screen').hidden = false;
+  }
 })();
