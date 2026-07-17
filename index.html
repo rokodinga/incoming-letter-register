@@ -1,175 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Incoming Letter Register 2026</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Register | Kodinga Range</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Full Screen Login Gate -->
-<div id="login-screen" class="login-overlay" hidden>
-  <div class="login-card glass-panel">
+<!-- Premium Login Gate -->
+<div id="login-screen" class="login-screen" hidden>
+  <div class="login-card">
     <div class="login-header">
-      <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="brand-logo" style="margin-bottom: 16px; width: 65px;">
-      <h2>System Login</h2>
-      <p>Enter your access token to view the register.</p>
+      <img src="govtodisha-logo.png" alt="Govt of Odisha Logo">
+      <h2>Secure Gateway</h2>
+      <p>Forest Range Office, Kodinga</p>
     </div>
-    
     <form id="login-form">
       <div class="field" style="margin-bottom: 24px;">
-        <label class="field__label" for="login-key">Access Token</label>
-        <input id="login-key" type="password" placeholder="••••••••••••" required>
+        <label class="field__label" for="login-key">Authentication Token</label>
+        <input id="login-key" type="password" placeholder="Enter your credentials" required>
       </div>
-      <button type="submit" class="btn btn--primary" style="width: 100%; padding: 12px; font-size: 1rem;">
-        Sign In to Dashboard
-      </button>
+      <button type="submit" class="btn btn--primary" style="width: 100%; padding: 12px;">Access Dashboard</button>
     </form>
   </div>
 </div>
 
-<div class="register">
-  <!-- Header / Masthead -->
-  <header class="masthead">
-    <div class="brand-container">
-      <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="brand-logo">
-      <div class="masthead__title">
-        <p class="dept-title">Forest, Environment and Climate Change Department, Govt of Odisha</p>
-        <h1 style="margin: 2px 0;">Forest Range Office, Kodinga Range</h1>
-        <p class="masthead__sub">Incoming Letter Register · <span id="year-label">2026</span></p>
+<!-- App Shell -->
+<div class="app-container">
+  
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar__header">
+      <img src="govtodisha-logo.png" alt="Logo" class="sidebar__logo">
+      <span class="sidebar__title">eRegister</span>
+    </div>
+    <nav class="sidebar__nav">
+      <a href="#" class="nav-item active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        Dashboard
+      </a>
+      <!-- Future navigation items go here -->
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-wrapper">
+    
+    <!-- Top Navigation -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <span class="topbar__dept">Forest & Environment Dept, Odisha</span>
+        <span class="topbar__office">Incoming Letters · <span id="year-label">2026</span></span>
       </div>
-    </div>
-    <div class="masthead__actions">
-      <span id="conn-status" class="conn-dot conn-dot--off" title="Not connected"></span>
-      <button id="logout-btn" class="btn btn--ghost" type="button">Logout</button>
-      <button id="new-letter-btn" class="btn btn--primary" type="button">+ New Letter</button>
-    </div>
-  </header>
+      <div class="topbar__right">
+        <div id="live-clock" class="live-clock">--:--:--</div>
+        <span id="conn-status" class="conn-dot conn-dot--off" title="System Status"></span>
+        <button id="logout-btn" class="btn btn--ghost btn--sm">Sign Out</button>
+        <button id="new-letter-btn" class="btn btn--primary">+ Register Dak</button>
+      </div>
+    </header>
 
-  <!-- Summary Cards -->
-  <section class="summary" id="summary-cards" aria-label="Summary">
-    <div class="stamp-card glass-panel stamp-card--pending">
-      <span class="stamp-card__num" id="count-pending">–</span>
-      <span class="stamp-card__label">Pending</span>
-    </div>
-    <div class="stamp-card glass-panel stamp-card--overdue">
-      <span class="stamp-card__num" id="count-overdue">–</span>
-      <span class="stamp-card__label">Overdue</span>
-    </div>
-    <div class="stamp-card glass-panel stamp-card--responded">
-      <span class="stamp-card__num" id="count-responded">–</span>
-      <span class="stamp-card__label">Responded</span>
-    </div>
-    <div class="stamp-card glass-panel stamp-card--communicated">
-      <span class="stamp-card__num" id="count-communicated">–</span>
-      <span class="stamp-card__label">Communicated</span>
-    </div>
-    <div class="stamp-card glass-panel stamp-card--total">
-      <span class="stamp-card__num" id="count-total">–</span>
-      <span class="stamp-card__label">Total Mails</span>
-    </div>
-    <div class="stamp-card glass-panel" style="background-color: rgba(255,255,255,0.2);">
-      <span class="stamp-card__num" id="count-rate" style="color: #ffffff;">–%</span>
-      <span class="stamp-card__label" style="color: rgba(255,255,255,0.8);">Clearance Rate</span>
-    </div>
-  </section>
+    <!-- Scrollable Workspace -->
+    <main class="dashboard-content">
+      
+      <!-- Enterprise Summary Cards -->
+      <section class="summary-grid" id="summary-cards">
+        <div class="stat-card">
+          <span class="stat-card__label">Action Pending</span>
+          <span class="stat-card__num" id="count-pending" style="color: var(--warning);">–</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Overdue Processing</span>
+          <span class="stat-card__num" id="count-overdue" style="color: var(--danger);">–</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Officially Responded</span>
+          <span class="stat-card__num" id="count-responded" style="color: var(--success);">–</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Communicated/Intimated</span>
+          <span class="stat-card__num" id="count-communicated" style="color: var(--info);">–</span>
+        </div>
+        <div class="stat-card stat-card--accent">
+          <span class="stat-card__label">Clearance Efficiency</span>
+          <span class="stat-card__num" id="count-rate">–%</span>
+        </div>
+      </section>
 
-  <!-- Dashboard Controls -->
-  <section class="toolbar glass-panel">
-    <label class="field">
-      <span class="field__label">Month Partition</span>
-      <select id="month-select"></select>
-    </label>
-    <label class="field field--grow">
-      <span class="field__label">Global Search</span>
-      <input id="search-input" type="text" placeholder="Search by subject, memo no. or date...">
-    </label>
-    <label class="field">
-      <span class="field__label">Status Filter</span>
-      <select id="status-filter">
-        <option value="">All Statuses</option>
-        <option value="Pending">Pending</option>
-        <option value="Responded">Responded</option>
-        <option value="Communicated">Communicated</option>
-      </select>
-    </label>
-    <div>
-      <button id="export-btn" class="btn btn--ghost" style="height: 100%;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        Export PDF
-      </button>
-    </div>
-  </section>
+      <!-- Smart Filter Toolbar -->
+      <section class="toolbar">
+        <label class="field">
+          <span class="field__label">Financial Partition</span>
+          <select id="month-select"></select>
+        </label>
+        <label class="field field--grow">
+          <span class="field__label">Enterprise Search</span>
+          <input id="search-input" type="text" placeholder="Search subject, memo, sender...">
+        </label>
+        <label class="field">
+          <span class="field__label">Workflow Status</span>
+          <select id="status-filter">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Responded">Responded</option>
+            <option value="Communicated">Communicated</option>
+          </select>
+        </label>
+        <div>
+          <button id="export-btn" class="btn btn--ghost" style="height: 100%;">Export Report</button>
+        </div>
+      </section>
 
-  <!-- Table -->
-  <section class="ledger-wrap glass-panel">
-    <table class="ledger" id="ledger-table">
-      <thead>
-        <tr>
-          <th class="col-sl">SL No</th>
-          <th class="col-subject">Subject</th>
-          <th class="col-memo">Memo No.</th>
-          <th class="col-date">Date</th>
-          <th class="col-date">Time Line</th>
-          <th class="col-status">Status</th>
-          <th class="col-responded">Action Taken / Data</th>
-          <th class="col-actions">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="ledger-body">
-        <tr><td colspan="8" class="empty-row">Authenticate to load letters.</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <footer class="foot-note">
-    <p>Official correspondence tracking system. Managed by Forest Range Office, Kodinga Range.</p>
-  </footer>
+      <!-- Advanced Data Table -->
+      <section class="table-container">
+        <table class="ledger" id="ledger-table">
+          <thead>
+            <tr>
+              <th>SL</th>
+              <th style="min-width: 280px;">Subject & Origin</th>
+              <th>Memo Reference</th>
+              <th>Receipt Date</th>
+              <th>Target Timeline</th>
+              <th>Status</th>
+              <th style="min-width: 250px;">Disposal Action</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ledger-body">
+            <tr><td colspan="8" class="empty-row">Authenticate to synchronize database.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      
+    </main>
+  </div>
 </div>
 
-<!-- Letter Add/Edit Modal -->
-<dialog id="letter-modal" class="modal glass-panel">
-  <form id="letter-form" method="dialog">
-    <h2 id="modal-title">New letter</h2>
-    <p class="modal-help">Fill in the details for the incoming correspondence.</p>
-    <input type="hidden" id="f-row">
-    <input type="hidden" id="f-month">
-
-    <div class="modal-grid">
-      <label class="field"><span class="field__label">SL No</span>
-        <input id="f-slNo" type="text" placeholder="Auto-generated"></label>
-      <label class="field"><span class="field__label">Status</span>
-        <select id="f-status">
-          <option value="Pending">Pending</option>
-          <option value="Responded">Responded</option>
-          <option value="Communicated">Communicated</option>
-        </select></label>
-      <label class="field field--full"><span class="field__label">Subject (Include links here if needed)</span>
-        <textarea id="f-subject" rows="2" required></textarea></label>
-      <label class="field"><span class="field__label">Memo No.</span>
-        <input id="f-memoNo" type="text"></label>
-      <label class="field"><span class="field__label">Date</span>
-        <input id="f-date" type="date"></label>
-      <label class="field"><span class="field__label">Time Line (due)</span>
-        <input id="f-timeLine" type="date"></label>
-      <label class="field"><span class="field__label">Responded through (e.g., Email, WhatsApp, Hard Copy)</span>
-        <input id="f-respondedThrough" type="text"></label>
-      <label class="field"><span class="field__label">Responded with Memo No &amp; Date</span>
-        <input id="f-respondedMemo" type="text"></label>
-      <label class="field field--full"><span class="field__label">Remarks / Document Links</span>
-        <textarea id="f-remarks" rows="2" placeholder="Paste drive links here..."></textarea></label>
+<!-- Side Drawer (Replaces Modal) -->
+<div id="drawer-overlay" class="drawer-overlay"></div>
+<aside id="letter-drawer" class="drawer">
+  <form id="letter-form" style="display: flex; flex-direction: column; height: 100%;">
+    <div class="drawer__header">
+      <h2 id="modal-title">Register Entry</h2>
+      <button type="button" class="drawer__close" id="drawer-close-btn">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    
+    <div class="drawer__content">
+      <input type="hidden" id="f-row">
+      <input type="hidden" id="f-month">
+      
+      <div class="drawer-grid">
+        <label class="field"><span class="field__label">SL Number</span>
+          <input id="f-slNo" type="text" placeholder="Auto"></label>
+        <label class="field"><span class="field__label">Workflow Status</span>
+          <select id="f-status">
+            <option value="Pending">Pending</option>
+            <option value="Responded">Responded</option>
+            <option value="Communicated">Communicated</option>
+          </select></label>
+        <label class="field field--full"><span class="field__label">Subject Context (Accepts Links)</span>
+          <textarea id="f-subject" rows="2" required></textarea></label>
+        <label class="field"><span class="field__label">Incoming Memo No.</span>
+          <input id="f-memoNo" type="text"></label>
+        <label class="field"><span class="field__label">Receipt Date</span>
+          <input id="f-date" type="date"></label>
+        <label class="field"><span class="field__label">Target Timeline</span>
+          <input id="f-timeLine" type="date"></label>
+        <label class="field"><span class="field__label">Mode of Response</span>
+          <input id="f-respondedThrough" type="text" placeholder="e.g., Email, Hard Copy"></label>
+        <label class="field"><span class="field__label">Outgoing Memo Ref</span>
+          <input id="f-respondedMemo" type="text"></label>
+        <label class="field field--full"><span class="field__label">Internal Remarks / File Links</span>
+          <textarea id="f-remarks" rows="3"></textarea></label>
+      </div>
     </div>
 
-    <div class="modal-actions">
-      <button type="button" class="btn btn--danger" id="modal-delete" hidden>Delete</button>
-      <button type="button" class="btn btn--ghost" id="modal-cancel">Cancel</button>
-      <button type="submit" class="btn btn--primary" id="modal-save">Save Letter</button>
+    <div class="drawer__footer">
+      <button type="button" class="btn btn--danger" id="modal-delete" style="margin-right: auto;" hidden>Delete Entry</button>
+      <button type="button" class="btn btn--ghost" id="drawer-cancel-btn">Cancel</button>
+      <button type="submit" class="btn btn--primary" id="modal-save">Commit Record</button>
     </div>
   </form>
-</dialog>
+</aside>
 
-<div id="toast" class="toast" hidden></div>
+<div id="toast" class="toast"></div>
 
 <script src="config.js"></script>
 <script src="app.js"></script>
