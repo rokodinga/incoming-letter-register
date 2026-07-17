@@ -1,271 +1,313 @@
 (function () {
   'use strict';
 
-  var cfg = {
-    webAppUrl: window.DEFAULT_CONFIG ? window.DEFAULT_CONFIG.webAppUrl : '',
-    apiKey: localStorage.getItem('ilr_key') || ''
+  // State Management Engine
+  const state = {
+    apiKey: localStorage.getItem('ilr_key') || '',
+    months: [],
+    currentMonth: null,
+    letters: [],
+    searchResults: [],
+    searchMode: false,
+    isProcessing: false // Prevents race conditions during API calls
   };
 
-  var state = {
-    months: [], currentMonth: null, letters: [], searchMode: false
+  const getEl = (id) => document.getElementById(id);
+  
+  // DOM Elements
+  const els = {
+    login: getEl('login-screen'), shell: getEl('app-shell'), keyInput: getEl('login-key'),
+    monthSel: getEl('month-select'), search: getEl('search-input'), filter: getEl('status-filter'),
+    tbody: getEl('ledger-body'), conn: getEl('conn-status'), clock: getEl('live-clock'),
+    drawer: getEl('letter-drawer'), overlay: getEl('drawer-overlay'), form: getEl('letter-form'),
+    btnSave: getEl('modal-save'), btnDel: getEl('modal-delete'), toast: getEl('toast')
   };
 
-  var $ = function (id) { return document.getElementById(id); };
-  var monthSelect = $('month-select'), searchInput = $('search-input'), statusFilter = $('status-filter');
-  var ledgerBody = $('ledger-body'), connDot = $('conn-status');
-
-  // Drawer Elements
-  var drawer = $('letter-drawer'), drawerOverlay = $('drawer-overlay');
-
-  // Live Clock Engine
-  function startLiveClock() {
-    var clockEl = $('live-clock');
-    if(!clockEl) return;
-    setInterval(function() {
-      var now = new Date();
-      clockEl.textContent = now.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short' }) + ' ' + 
-                            now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+  // Clock Module
+  if (els.clock) {
+    setInterval(() => {
+      const now = new Date();
+      els.clock.textContent = now.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short' }) + ' ' + 
+                              now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
     }, 1000);
   }
-  startLiveClock();
 
-  // API helper
-  function api(action, params, isWrite) {
-    if (!cfg.webAppUrl || !cfg.apiKey) return Promise.reject(new Error('Missing credentials'));
-    params = params || {}; params.action = action; params.key = cfg.apiKey;
+  // API Gateway
+  async function apiFetch(action, params = {}, isWrite = false) {
+    if (!window.DEFAULT_CONFIG?.webAppUrl || !state.apiKey) throw new Error('Authentication required');
+    
+    params.action = action;
+    params.key = state.apiKey;
+    // Cache buster guarantees fresh data
+    const url = new URL(window.DEFAULT_CONFIG.webAppUrl);
+    url.searchParams.append('cb', Date.now()); 
+
+    const options = isWrite 
+      ? { method: 'POST', body: JSON.stringify(params), headers: { 'Content-Type': 'text/plain' } }
+      : { method: 'GET' };
+
     if (!isWrite) {
-      var qs = Object.keys(params).map(function (k) {
-        return encodeURIComponent(k) + '=' + encodeURIComponent(typeof params[k] === 'object' ? JSON.stringify(params[k]) : params[k]);
-      }).join('&');
-      return fetch(cfg.webAppUrl + '?' + qs).then(function (r) { return r.json(); });
+      Object.keys(params).forEach(key => url.searchParams.append(key, typeof params[key] === 'object' ? JSON.stringify(params[key]) : params[key]));
     }
-    return fetch(cfg.webAppUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(params) }).then(function (r) { return r.json(); });
+
+    try {
+      const response = await fetch(url.toString(), options);
+      if (!response.ok) throw new Error('Network response failure');
+      const data = await response.json();
+      if (!data.ok) throw new Error(data.error || 'Server rejected request');
+      return data;
+    } catch (err) {
+      console.error('API Error:', err);
+      throw err;
+    }
   }
 
-  // Modern Toast Animation
-  var toastEl = $('toast'), toastTimer;
-  function toast(msg, kind) {
-    toastEl.textContent = msg;
-    toastEl.className = 'toast toast--' + (kind || 'info') + ' active';
+  // UI Notification Engine
+  let toastTimer;
+  function showToast(msg, type = 'info') {
+    els.toast.textContent = msg;
+    els.toast.className = `toast toast--${type} active`;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toastEl.classList.remove('active'); }, 3000);
+    toastTimer = setTimeout(() => els.toast.classList.remove('active'), 3500);
   }
 
-  // Date Parsing
-  function parseDMY(s) {
+  // Data Parsing & Security
+  const parseDMY = (s) => {
     if (!s) return null;
-    var parts = String(s).split(/[\/\-]/);
-    if (parts.length !== 3) return null;
-    if (parts[0].length === 4) return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-    var y = parseInt(parts[2], 10); if (y < 100) y += 2000;
-    return new Date(y, parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
-  }
-  function formatForInput(dateStr) {
-    var dt = parseDMY(dateStr); if (!dt) return '';
-    var m = dt.getMonth() + 1, d = dt.getDate();
-    return dt.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (d < 10 ? '0' : '') + d;
-  }
-  function isOverdue(letter) {
-    if (letter.status !== 'Pending') return false;
-    var due = parseDMY(letter.timeLine); if (!due) return false;
-    var today = new Date(); today.setHours(0, 0, 0, 0); return due < today;
-  }
-  function todayLabelMonth() {
-    var now = new Date(); return now.toLocaleString('en-US', { month: 'long' }) + ' ' + now.getFullYear();
-  }
-
-  function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-
-  // Upgraded Link Parser (Enterprise Styling)
-  function parseLinks(text, context) {
-    var str = escapeHtml(text);
-    var urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|mail\.google\.com[^\s]+|gmail\.com[^\s]+)/g;
-    return str.replace(urlRegex, function(url) {
-      var href = url.startsWith('http') ? url : 'https://' + url;
-      var label = 'View Link', isGmail = url.indexOf('mail.google.com') !== -1 || url.indexOf('gmail.com') !== -1;
-      var icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>';
-      
-      if (isGmail) {
-        label = context === 'incoming' ? 'Incoming Dak' : (context === 'outgoing' ? 'Sent Mail' : 'View Email');
-        icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>';
-        return '<a href="' + href + '" target="_blank" class="link-badge link-badge--gmail">' + icon + label + '</a>';
-      }
-      return '<a href="' + href + '" target="_blank" class="link-badge">' + icon + label + '</a>';
+    const p = String(s).split(/[\/\-]/);
+    if (p.length !== 3) return null;
+    if (p[0].length === 4) return new Date(p[0], p[1] - 1, p[2]);
+    let y = parseInt(p[2], 10); if (y < 100) y += 2000;
+    return new Date(y, p[1] - 1, p[0]);
+  };
+  const isOverdue = (l) => l.status === 'Pending' && parseDMY(l.timeLine) < new Date().setHours(0,0,0,0);
+  const escapeHTML = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  
+  const parseLinks = (text, context) => {
+    return escapeHTML(text).replace(/(https?:\/\/[^\s]+|www\.[^\s]+|mail\.google\.com[^\s]+|gmail\.com[^\s]+)/g, url => {
+      const href = url.startsWith('http') ? url : `https://${url}`;
+      const isGmail = url.includes('mail.google.com') || url.includes('gmail.com');
+      const label = isGmail ? (context === 'incoming' ? 'Incoming Dak' : 'Sent Mail') : 'View Link';
+      const css = isGmail ? 'link-badge link-badge--gmail' : 'link-badge';
+      const icon = isGmail 
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>';
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="${css}">${icon}${label}</a>`;
     });
-  }
+  };
 
-  // UI Rendering
-  function renderSummary(letters) {
-    var t = letters.length, p = 0, o = 0, r = 0, c = 0;
-    letters.forEach(function(l) {
-      if(l.status === 'Pending') { p++; if(isOverdue(l)) o++; }
-      else if(l.status === 'Responded') r++;
-      else if(l.status === 'Communicated') c++;
+  // Rendering Engine
+  function renderDashboard() {
+    const data = state.searchMode ? state.searchResults : state.letters;
+    const filtered = els.filter.value ? data.filter(l => l.status === els.filter.value) : data;
+    
+    // KPI Calculation
+    let p = 0, o = 0, r = 0, c = 0;
+    (state.searchMode ? state.letters : data).forEach(l => {
+      if (l.status === 'Pending') { p++; if (isOverdue(l)) o++; }
+      else if (l.status === 'Responded') r++;
+      else if (l.status === 'Communicated') c++;
     });
-    $('count-pending').textContent = p; $('count-overdue').textContent = o;
-    $('count-responded').textContent = r; $('count-communicated').textContent = c;
-    $('count-rate').textContent = t === 0 ? '0%' : Math.round(((r + c) / t) * 100) + '%';
-  }
+    
+    getEl('count-pending').textContent = p; getEl('count-overdue').textContent = o;
+    getEl('count-responded').textContent = r; getEl('count-communicated').textContent = c;
+    const total = p + r + c;
+    getEl('count-rate').textContent = total === 0 ? '0%' : Math.round(((r + c) / total) * 100) + '%';
 
-  function getStatusBadge(letter) {
-    if (isOverdue(letter)) return '<span class="status-badge status-badge--overdue">Overdue</span>';
-    var lower = letter.status.toLowerCase();
-    return '<span class="status-badge status-badge--'+lower+'">'+escapeHtml(letter.status)+'</span>';
-  }
+    // Table Generation
+    if (!filtered.length) {
+      els.tbody.innerHTML = '<tr><td colspan="8" class="empty-row">No records match the current criteria.</td></tr>';
+      return;
+    }
 
-  function renderTable(letters) {
-    if (!letters.length) { ledgerBody.innerHTML = '<tr><td colspan="8" class="empty-row">No records found for this view.</td></tr>'; return; }
-    ledgerBody.innerHTML = letters.map(function (l) {
-      var sOut = parseLinks(l.subject, 'incoming'), mOut = parseLinks(l.memoNo, 'incoming');
-      var rMemo = parseLinks(l.respondedMemo, 'outgoing'), rVia = escapeHtml(l.respondedThrough);
-      var rDisp = (rMemo ? '<div style="margin-bottom:4px;"><b>Ref:</b> ' + rMemo + '</div>' : '') + (rVia ? '<div style="color:var(--text-muted);font-size:0.8rem;"><b>Via:</b> ' + rVia + '</div>' : '');
-      
-      return '<tr>' +
-        '<td><b>' + escapeHtml(l.slNo) + '</b></td>' +
-        '<td>' + sOut + '</td>' + '<td>' + mOut + '</td>' +
-        '<td>' + escapeHtml(l.date) + '</td>' + '<td>' + escapeHtml(l.timeLine) + '</td>' +
-        '<td>' + getStatusBadge(l) + '</td>' + '<td>' + rDisp + '</td>' +
-        '<td><button class="btn btn--ghost" data-edit="' + l.row + '" data-month="' + escapeHtml(l.month) + '">Edit</button></td>' +
-        '</tr>';
-    }).join('');
+    els.tbody.innerHTML = filtered.map(l => `
+      <tr>
+        <td><b>${escapeHTML(l.slNo)}</b></td>
+        <td>${parseLinks(l.subject, 'incoming')}</td>
+        <td>${parseLinks(l.memoNo, 'incoming')}</td>
+        <td>${escapeHTML(l.date)}</td>
+        <td>${escapeHTML(l.timeLine)}</td>
+        <td><span class="status-badge status-badge--${l.status.toLowerCase()}">${isOverdue(l) ? 'Overdue' : escapeHTML(l.status)}</span></td>
+        <td>
+          ${l.respondedMemo ? `<div style="margin-bottom:4px;"><b>Ref:</b> ${parseLinks(l.respondedMemo, 'outgoing')}</div>` : ''}
+          ${l.respondedThrough ? `<div style="color:var(--text-muted);font-size:0.8rem;"><b>Via:</b> ${escapeHTML(l.respondedThrough)}</div>` : ''}
+        </td>
+        <td class="no-print"><button type="button" class="btn btn--ghost" data-edit="${l.row}" data-month="${escapeHTML(l.month)}">Edit</button></td>
+      </tr>
+    `).join('');
 
-    ledgerBody.querySelectorAll('[data-edit]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var row = Number(btn.getAttribute('data-edit')), month = btn.getAttribute('data-month');
-        var letter = (state.searchMode ? state.searchResults : state.letters).find(function (l) { return l.row === row && l.month === month; });
-        if (letter) openDrawer(letter);
+    els.tbody.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = (state.searchMode ? state.searchResults : state.letters).find(l => l.row === Number(btn.dataset.edit) && l.month === btn.dataset.month);
+        if (target) openDrawer(target);
       });
     });
   }
 
-  function applyFilters() {
-    var source = state.searchMode ? state.searchResults : state.letters;
-    var filtered = statusFilter.value ? source.filter(function (l) { return l.status === statusFilter.value; }) : source;
-    renderSummary(state.searchMode ? state.letters : source); renderTable(filtered);
+  // Core Sync Function
+  async function syncDatabase() {
+    els.tbody.innerHTML = '<tr><td colspan="8" class="empty-row">Synchronizing with enterprise database...</td></tr>';
+    els.conn.className = 'conn-dot';
+    
+    try {
+      const monthRes = await apiFetch('listMonths');
+      const nowLbl = new Date().toLocaleString('en-US', { month: 'long' }) + ' ' + new Date().getFullYear();
+      state.months = monthRes.months.length ? monthRes.months : [nowLbl];
+      state.currentMonth = state.currentMonth || (state.months.includes(nowLbl) ? nowLbl : state.months[state.months.length - 1]);
+      
+      els.monthSel.innerHTML = state.months.map(m => `<option value="${m}">${m}</option>`).join('');
+      els.monthSel.value = state.currentMonth;
+      
+      els.conn.classList.add('conn-dot--on');
+      const dataRes = await apiFetch('listLetters', { month: state.currentMonth });
+      state.letters = dataRes.letters;
+      state.searchMode = !!els.search.value;
+      renderDashboard();
+    } catch (err) {
+      els.tbody.innerHTML = '<tr><td colspan="8" class="empty-row" style="color:var(--danger);">Connection failed. Please check credentials or network.</td></tr>';
+      throw err;
+    }
   }
 
-  // Data Loading
-  function refreshAll() {
-    return api('listMonths', {}, false).then(function (res) {
-      if (!res.ok) throw new Error(res.error);
-      state.months = res.months.length ? res.months : [todayLabelMonth()];
-      state.currentMonth = state.currentMonth || (state.months.includes(todayLabelMonth()) ? todayLabelMonth() : state.months[state.months.length - 1]);
-      monthSelect.innerHTML = state.months.map(function(m){ return '<option value="'+m+'">'+m+'</option>'; }).join('');
-      monthSelect.value = state.currentMonth; setConnected(true);
-      return api('listLetters', { month: state.currentMonth }, false);
-    }).then(function (res) {
-      state.letters = res.letters; state.searchMode = false; applyFilters();
-    });
-  }
+  // Drawer Interactions
+  function openDrawer(data = null) {
+    getEl('modal-title').textContent = data ? `Update Entry #${data.slNo}` : 'Register New Dak';
+    els.btnDel.hidden = !data;
+    getEl('f-row').value = data ? data.row : '';
+    getEl('f-month').value = data ? data.month : state.currentMonth;
 
-  function setConnected(on) {
-    connDot.className = 'conn-dot ' + (on ? 'conn-dot--on' : 'conn-dot--off');
-  }
-
-  // Drawer Controller
-  function openDrawer(letter) {
-    var isEdit = !!letter;
-    $('modal-title').textContent = isEdit ? 'Update Entry #' + letter.slNo : 'Register New Dak';
-    $('modal-delete').hidden = !isEdit;
-    $('f-row').value = isEdit ? letter.row : '';
-    $('f-month').value = isEdit ? letter.month : state.currentMonth;
-
-    ['slNo','subject','memoNo','date','timeLine','respondedMemo','respondedThrough','status','remarks'].forEach(function (f) {
-      var el = $('f-' + f), val = isEdit ? (letter[f] || '') : (f === 'status' ? 'Pending' : '');
-      el.value = el.type === 'date' && val ? formatForInput(val) : val;
+    ['slNo','status','subject','memoNo','date','timeLine','respondedThrough','respondedMemo','remarks'].forEach(f => {
+      const el = getEl(`f-${f}`);
+      let val = data ? (data[f] || '') : (f === 'status' ? 'Pending' : '');
+      if (el.type === 'date' && val) {
+        const d = parseDMY(val);
+        val = d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` : '';
+      }
+      el.value = val;
     });
     
-    drawerOverlay.classList.add('active');
-    drawer.classList.add('active');
+    els.overlay.classList.add('active'); els.overlay.setAttribute('aria-hidden', 'false');
+    els.drawer.classList.add('active'); els.drawer.setAttribute('aria-hidden', 'false');
   }
 
   function closeDrawer() {
-    drawer.classList.remove('active');
-    drawerOverlay.classList.remove('active');
+    els.drawer.classList.remove('active'); els.drawer.setAttribute('aria-hidden', 'true');
+    els.overlay.classList.remove('active'); els.overlay.setAttribute('aria-hidden', 'true');
+    els.form.reset();
   }
 
-  $('new-letter-btn').addEventListener('click', function () { openDrawer(null); });
-  $('drawer-close-btn').addEventListener('click', closeDrawer);
-  $('drawer-cancel-btn').addEventListener('click', closeDrawer);
-  drawerOverlay.addEventListener('click', closeDrawer);
+  // Event Listeners
+  getEl('new-letter-btn').addEventListener('click', () => openDrawer());
+  getEl('drawer-close-btn').addEventListener('click', closeDrawer);
+  getEl('drawer-cancel-btn').addEventListener('click', closeDrawer);
+  els.overlay.addEventListener('click', closeDrawer);
 
-  $('letter-form').addEventListener('submit', function (e) {
+  els.form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    var row = $('f-row').value, month = $('f-month').value, data = {};
-    ['slNo','subject','memoNo','date','timeLine','respondedMemo','respondedThrough','status','remarks'].forEach(function (f) {
-      var el = $('f-' + f); data[f] = (el.type === 'date' && el.value) ? el.value.split('-').reverse().join('/') : el.value;
+    if (state.isProcessing) return;
+    
+    state.isProcessing = true;
+    els.btnSave.disabled = true;
+    els.btnSave.textContent = 'Saving...';
+
+    const row = getEl('f-row').value;
+    const month = getEl('f-month').value;
+    const payload = {};
+    
+    ['slNo','status','subject','memoNo','date','timeLine','respondedThrough','respondedMemo','remarks'].forEach(f => {
+      const el = getEl(`f-${f}`);
+      payload[f] = (el.type === 'date' && el.value) ? el.value.split('-').reverse().join('/') : el.value;
     });
 
-    api(row ? 'updateLetter' : 'addLetter', row ? { month: month, row: row, data: data } : { month: month, data: data }, true).then(function (res) {
-      if (!res.ok) return toast('Error: ' + res.error, 'error');
-      toast(row ? 'Record Updated' : 'Record Registered', 'ok');
+    try {
+      await apiFetch(row ? 'updateLetter' : 'addLetter', row ? { month, row, data: payload } : { month, data: payload }, true);
+      showToast(row ? 'Record securely updated' : 'Record registered successfully', 'ok');
       closeDrawer();
-      if (month === state.currentMonth) refreshAll();
-    });
-  });
-
-  $('modal-delete').addEventListener('click', function () {
-    var row = $('f-row').value, month = $('f-month').value;
-    if (confirm('Permanently delete this entry?')) {
-      api('deleteLetter', { month: month, row: row }, true).then(function (res) {
-        if (!res.ok) return toast('Error: ' + res.error, 'error');
-        toast('Record Deleted', 'ok'); closeDrawer(); refreshAll();
-      });
+      if (month === state.currentMonth) await syncDatabase();
+    } catch (err) {
+      showToast('Transaction failed: ' + err.message, 'error');
+    } finally {
+      state.isProcessing = false;
+      els.btnSave.disabled = false;
+      els.btnSave.textContent = 'Commit Record';
     }
   });
 
-  // Security Helper: Wipes the UI clean
-  function clearData() {
-    state.letters = [];
-    state.searchResults = [];
-    ledgerBody.innerHTML = '<tr><td colspan="8" class="empty-row">Authenticate to synchronize database.</td></tr>';
-    $('count-pending').textContent = '–';
-    $('count-overdue').textContent = '–';
-    $('count-responded').textContent = '–';
-    $('count-communicated').textContent = '–';
-    $('count-rate').textContent = '–%';
+  els.btnDel.addEventListener('click', async () => {
+    if (state.isProcessing || !confirm('CONFIRMATION REQUIRED: Irreversibly delete this official record?')) return;
+    state.isProcessing = true;
+    els.btnDel.disabled = true;
+    try {
+      await apiFetch('deleteLetter', { month: getEl('f-month').value, row: getEl('f-row').value }, true);
+      showToast('Record permanently deleted', 'ok');
+      closeDrawer();
+      await syncDatabase();
+    } catch (err) {
+      showToast('Deletion failed: ' + err.message, 'error');
+    } finally {
+      state.isProcessing = false;
+      els.btnDel.disabled = false;
+    }
+  });
+
+  // Global Controls
+  els.monthSel.addEventListener('change', () => { state.currentMonth = els.monthSel.value; els.search.value = ''; syncDatabase(); });
+  els.filter.addEventListener('change', renderDashboard);
+  getEl('export-btn').addEventListener('click', () => window.print());
+
+  let debounceTimer;
+  els.search.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const q = els.search.value.trim();
+    if (!q) { state.searchMode = false; return renderDashboard(); }
+    debounceTimer = setTimeout(async () => {
+      try {
+        const res = await apiFetch('search', { query: q });
+        state.searchMode = true; state.searchResults = res.results; renderDashboard();
+      } catch(err) { showToast('Search failure', 'error'); }
+    }, 400);
+  });
+
+  // Auth Management
+  function secureWipe() {
+    state.letters = []; state.searchResults = [];
+    els.tbody.innerHTML = '<tr><td colspan="8" class="empty-row">Authentication required.</td></tr>';
+    ['count-pending', 'count-overdue', 'count-responded', 'count-communicated'].forEach(id => getEl(id).textContent = '0');
+    getEl('count-rate').textContent = '0%';
   }
 
-  // Login & Toolbar Events
-  $('logout-btn').addEventListener('click', function() { 
-    localStorage.removeItem('ilr_key'); 
-    cfg.apiKey = ''; 
-    setConnected(false); 
-    clearData(); // Instantly wipes the data from the screen
-    $('login-screen').hidden = false; 
-    toast('Session Ended'); 
-  });
-  
-  $('login-form').addEventListener('submit', function (e) {
-    e.preventDefault(); cfg.apiKey = $('login-key').value.trim(); localStorage.setItem('ilr_key', cfg.apiKey);
-    toast('Authenticating Securely...');
-    refreshAll().then(function () { $('login-screen').hidden = true; toast('Access Granted', 'ok'); }).catch(function () { toast('Access Denied', 'error'); });
+  getEl('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('ilr_key'); state.apiKey = '';
+    els.conn.className = 'conn-dot'; secureWipe();
+    els.shell.hidden = true; els.login.showModal();
+    showToast('Secure session terminated');
   });
 
-  monthSelect.addEventListener('change', function () { state.currentMonth = monthSelect.value; searchInput.value = ''; refreshAll(); });
-  statusFilter.addEventListener('change', applyFilters);
-  $('export-btn').addEventListener('click', function() { window.print(); });
-
-  var searchTimer;
-  searchInput.addEventListener('input', function () {
-    clearTimeout(searchTimer); var q = searchInput.value.trim();
-    if (!q) { state.searchMode = false; return applyFilters(); }
-    searchTimer = setTimeout(function () {
-      api('search', { query: q }, false).then(function (res) {
-        state.searchMode = true; state.searchResults = res.results; applyFilters();
-      });
-    }, 350);
+  getEl('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = getEl('login-submit-btn');
+    state.apiKey = els.keyInput.value.trim();
+    btn.disabled = true; btn.textContent = 'Verifying Token...';
+    
+    try {
+      await syncDatabase();
+      localStorage.setItem('ilr_key', state.apiKey);
+      els.login.close(); els.shell.hidden = false;
+      showToast('Access Granted', 'ok');
+    } catch (err) {
+      showToast('Access Denied: Invalid Token', 'error');
+      secureWipe();
+    } finally {
+      btn.disabled = false; btn.textContent = 'Access Dashboard';
+    }
   });
 
-  // Critical Update: Corrected Auto-Login Bootstrapper
-  if (cfg.webAppUrl && cfg.apiKey) {
-    refreshAll().then(function() {
-      $('login-screen').hidden = true; 
-    }).catch(function () { 
-      setConnected(false); 
-      $('login-screen').hidden = false; 
-    });
+  // Initialization Sequence
+  if (window.DEFAULT_CONFIG?.webAppUrl && state.apiKey) {
+    syncDatabase()
+      .then(() => { els.login.close(); els.shell.hidden = false; })
+      .catch(() => { secureWipe(); els.login.showModal(); });
   } else {
-    $('login-screen').hidden = false;
+    els.login.showModal();
   }
 })();
