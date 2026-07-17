@@ -59,6 +59,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-width: 0; /* CRITICAL FIX: Stops the wide table from stretching the mobile screen */
 }
 
 /* ---------- Top Navigation ---------- */
@@ -102,6 +103,7 @@ body {
   overflow-y: auto;
   padding: 24px;
   scroll-behavior: smooth;
+  min-width: 0; /* CRITICAL FIX: Allows internal table scrolling on mobile */
 }
 
 /* ---------- UI Components ---------- */
@@ -118,7 +120,7 @@ body {
 .btn--danger { border-color: var(--danger); color: var(--danger); background: transparent; }
 .btn--danger:hover { background: var(--danger-bg); }
 
-/* Summary Cards (Material 3 Style) */
+/* Summary Cards */
 .summary-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px; margin-bottom: 24px;
@@ -197,7 +199,7 @@ table.ledger { width: 100%; border-collapse: separate; border-spacing: 0; min-wi
 .link-badge--gmail { background-color: #fce8e6; color: #ea4335; border-color: #fad1ce; }
 .link-badge--gmail:hover { background-color: #ea4335; color: #ffffff; }
 
-/* ---------- Side Drawer (Replaces Modal) ---------- */
+/* ---------- Side Drawer ---------- */
 .drawer-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px);
@@ -269,3 +271,97 @@ table.ledger { width: 100%; border-collapse: separate; border-spacing: 0; min-wi
   .ledger thead th { border-bottom: 2px solid #000; color: #000; background: #fff !important; }
   .ledger tbody td { border-bottom: 1px solid #ccc; color: #000; }
 }
+
+
+/* =========================================================================
+   MOBILE RESPONSIVENESS ENGINE
+   ========================================================================= */
+
+@media (max-width: 850px) {
+  /* 1. Header Stacking */
+  .topbar {
+    height: auto;
+    padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .topbar__left {
+    width: 100%;
+    align-items: flex-start;
+  }
+  .topbar__logo {
+    width: 38px;
+    height: 38px;
+  }
+  .topbar__titles {
+    flex: 1;
+  }
+  .topbar__office {
+    font-size: 1.05rem;
+    line-height: 1.2;
+    margin-top: 2px;
+  }
+  .topbar__dept {
+    font-size: 0.65rem;
+    line-height: 1.2;
+    white-space: normal; /* Allows long department name to wrap naturally */
+  }
+  .topbar__right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .live-clock {
+    display: none; /* Hidden on mobile to free up space */
+  }
+
+  /* 2. Content Padding */
+  .dashboard-content {
+    padding: 12px;
+  }
+
+  /* 3. Summary Cards (2 Columns) */
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .stat-card {
+    padding: 16px;
+  }
+  .stat-card__num {
+    font-size: 1.8rem;
+  }
+
+  /* 4. Filter Toolbar */
+  .toolbar {
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+  }
+  .toolbar .field, .toolbar div, #export-btn {
+    width: 100%;
+  }
+
+  /* 5. Side Drawer Fixes */
+  .drawer {
+    max-width: 100%;
+  }
+  .drawer-grid {
+    grid-template-columns: 1fr; /* Form fields stack into 1 column */
+    gap: 12px;
+  }
+  
+  /* 6. Login Screen */
+  .login-card {
+    padding: 32px 24px;
+    width: 90%;
+  }
+}
+
+/* For extremely small phones (e.g. iPhone SE) */
+@media (max-width: 400px) {
+  .summary-grid {
+    grid-template-columns: 1fr; /* Stack cards into a single column */
+  }
+}
+
