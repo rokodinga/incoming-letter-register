@@ -2,182 +2,182 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- CRITICAL: This mathematically forces mobile browsers to render at actual device width, preventing the "zoomed out" bug -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>E-Register | Kodinga Range</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="description" content="Enterprise Incoming Letter Register for Forest Range Office, Kodinga">
+  <title>eRegister | Kodinga Forest Range</title>
+  <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
 
-<!-- Premium Login Gate -->
-<div id="login-screen" class="login-screen" hidden>
-  <div class="login-card">
-    <div class="login-header">
-      <img src="govtodisha-logo.png" alt="Govt of Odisha Logo">
-      <h2>Secure Gateway</h2>
-      <p>Forest Range Office, Kodinga</p>
-    </div>
-    <form id="login-form">
-      <div class="field" style="margin-bottom: 24px;">
-        <label class="field__label" for="login-key">Authentication Token</label>
-        <input id="login-key" type="password" placeholder="Enter your credentials" required>
+  <!-- Secure Gateway -->
+  <dialog id="login-screen" class="login-screen" open>
+    <div class="login-card">
+      <div class="login-header">
+        <img src="govtodisha-logo.png" alt="Government of Odisha Official Logo" width="72" height="72">
+        <h2>Secure Gateway</h2>
+        <p>Forest Range Office, Kodinga</p>
       </div>
-      <button type="submit" class="btn btn--primary" style="width: 100%; padding: 12px;">Access Dashboard</button>
+      <form id="login-form">
+        <div class="field" style="margin-bottom: 24px;">
+          <label class="field__label" for="login-key">Authentication Token</label>
+          <input id="login-key" type="password" placeholder="Enter secure credentials" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn--primary" id="login-submit-btn" style="width: 100%; padding: 12px;">Access Dashboard</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Enterprise Application Shell -->
+  <div class="app-container" id="app-shell" hidden>
+    
+    <div class="main-wrapper">
+      
+      <!-- Universal Top Navigation -->
+      <header class="topbar">
+        <div class="topbar__left">
+          <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="topbar__logo">
+          <div class="topbar__titles">
+            <span class="topbar__dept">Forest & Environment Dept, Odisha</span>
+            <h1 class="topbar__office">Incoming Letters · <span id="year-label">2026</span></h1>
+          </div>
+        </div>
+        <div class="topbar__right">
+          <div id="live-clock" class="live-clock" aria-live="polite">--:--:--</div>
+          <span id="conn-status" class="conn-dot conn-dot--off" aria-label="System Connection Status"></span>
+          <button id="logout-btn" class="btn btn--ghost btn--sm" type="button">Sign Out</button>
+          <button id="new-letter-btn" class="btn btn--primary" type="button">+ Register Dak</button>
+        </div>
+      </header>
+
+      <!-- Dynamic Workspace -->
+      <main class="dashboard-content">
+        
+        <!-- Key Performance Indicators (KPIs) -->
+        <section class="summary-grid" aria-label="Dashboard Statistics">
+          <article class="stat-card">
+            <span class="stat-card__label">Action Pending</span>
+            <span class="stat-card__num" id="count-pending" style="color: var(--warning);">0</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Overdue</span>
+            <span class="stat-card__num" id="count-overdue" style="color: var(--danger);">0</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Responded</span>
+            <span class="stat-card__num" id="count-responded" style="color: var(--success);">0</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__label">Communicated</span>
+            <span class="stat-card__num" id="count-communicated" style="color: var(--info);">0</span>
+          </article>
+          <article class="stat-card stat-card--accent">
+            <span class="stat-card__label">Efficiency</span>
+            <span class="stat-card__num" id="count-rate">0%</span>
+          </article>
+        </section>
+
+        <!-- Search & Filter Engine -->
+        <section class="toolbar" aria-label="Data Filters">
+          <label class="field">
+            <span class="field__label">Financial Partition</span>
+            <select id="month-select" aria-label="Select Month"></select>
+          </label>
+          <label class="field field--grow">
+            <span class="field__label">Enterprise Search</span>
+            <input id="search-input" type="search" placeholder="Search subject, memo, sender..." aria-label="Search records">
+          </label>
+          <label class="field">
+            <span class="field__label">Workflow Status</span>
+            <select id="status-filter" aria-label="Filter by Status">
+              <option value="">All Statuses</option>
+              <option value="Pending">Pending</option>
+              <option value="Responded">Responded</option>
+              <option value="Communicated">Communicated</option>
+            </select>
+          </label>
+          <div class="print-actions">
+            <button id="export-btn" class="btn btn--ghost" type="button" style="height: 100%;">Export PDF</button>
+          </div>
+        </section>
+
+        <!-- Data Presentation -->
+        <section class="table-container" tabindex="0">
+          <table class="ledger" id="ledger-table">
+            <thead>
+              <tr>
+                <th scope="col">SL</th>
+                <th scope="col" style="min-width: 280px;">Subject & Origin</th>
+                <th scope="col">Memo Ref</th>
+                <th scope="col">Receipt Date</th>
+                <th scope="col">Target Timeline</th>
+                <th scope="col">Status</th>
+                <th scope="col" style="min-width: 250px;">Disposal Action</th>
+                <th scope="col" class="no-print">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-body">
+              <tr><td colspan="8" class="empty-row">Initializing secure connection...</td></tr>
+            </tbody>
+          </table>
+        </section>
+        
+      </main>
+    </div>
+  </div>
+
+  <!-- Data Entry Side Drawer -->
+  <div id="drawer-overlay" class="drawer-overlay" aria-hidden="true"></div>
+  <aside id="letter-drawer" class="drawer" aria-labelledby="modal-title" aria-hidden="true">
+    <form id="letter-form" class="drawer__form">
+      <header class="drawer__header">
+        <h2 id="modal-title">Register Entry</h2>
+        <button type="button" class="drawer__close" id="drawer-close-btn" aria-label="Close form">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </header>
+      
+      <div class="drawer__content">
+        <input type="hidden" id="f-row">
+        <input type="hidden" id="f-month">
+        
+        <div class="drawer-grid">
+          <label class="field"><span class="field__label">SL Number</span>
+            <input id="f-slNo" type="text" placeholder="Auto-generated"></label>
+          <label class="field"><span class="field__label">Workflow Status</span>
+            <select id="f-status" required>
+              <option value="Pending">Pending</option>
+              <option value="Responded">Responded</option>
+              <option value="Communicated">Communicated</option>
+            </select></label>
+          <label class="field field--full"><span class="field__label">Subject Context (Accepts URLs)</span>
+            <textarea id="f-subject" rows="2" required></textarea></label>
+          <label class="field"><span class="field__label">Incoming Memo No.</span>
+            <input id="f-memoNo" type="text"></label>
+          <label class="field"><span class="field__label">Receipt Date</span>
+            <input id="f-date" type="date"></label>
+          <label class="field"><span class="field__label">Target Timeline</span>
+            <input id="f-timeLine" type="date"></label>
+          <label class="field"><span class="field__label">Mode of Response</span>
+            <input id="f-respondedThrough" type="text" placeholder="e.g., Email, Hard Copy"></label>
+          <label class="field"><span class="field__label">Outgoing Memo Ref</span>
+            <input id="f-respondedMemo" type="text"></label>
+          <label class="field field--full"><span class="field__label">Internal Remarks / File Links</span>
+            <textarea id="f-remarks" rows="3"></textarea></label>
+        </div>
+      </div>
+
+      <footer class="drawer__footer">
+        <button type="button" class="btn btn--danger" id="modal-delete" style="margin-right: auto;" hidden>Delete</button>
+        <button type="button" class="btn btn--ghost" id="drawer-cancel-btn">Cancel</button>
+        <button type="submit" class="btn btn--primary" id="modal-save">Commit Record</button>
+      </footer>
     </form>
-  </div>
-</div>
+  </aside>
 
-<!-- App Shell -->
-<div class="app-container">
-  
-  <div class="main-wrapper">
-    
-    <!-- Top Navigation (Fluid) -->
-    <header class="topbar">
-      <div class="topbar__left">
-        <img src="govtodisha-logo.png" alt="Govt of Odisha Logo" class="topbar__logo">
-        <div class="topbar__titles">
-          <span class="topbar__dept">Forest, Environment & Climate Change Dept, Govt of Odisha</span>
-          <span class="topbar__office">Incoming Letters · <span id="year-label">2026</span></span>
-        </div>
-      </div>
-      <div class="topbar__right">
-        <div id="live-clock" class="live-clock">--:--:--</div>
-        <span id="conn-status" class="conn-dot conn-dot--off" title="System Status"></span>
-        <button id="logout-btn" class="btn btn--ghost btn--sm">Sign Out</button>
-        <button id="new-letter-btn" class="btn btn--primary">+ Register Dak</button>
-      </div>
-    </header>
+  <!-- Global Toast Notifications -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
 
-    <!-- Scrollable Workspace -->
-    <main class="dashboard-content">
-      
-      <!-- Enterprise Summary Cards -->
-      <section class="summary-grid" id="summary-cards">
-        <div class="stat-card">
-          <span class="stat-card__label">Action Pending</span>
-          <span class="stat-card__num" id="count-pending" style="color: var(--warning);">–</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__label">Overdue Processing</span>
-          <span class="stat-card__num" id="count-overdue" style="color: var(--danger);">–</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__label">Officially Responded</span>
-          <span class="stat-card__num" id="count-responded" style="color: var(--success);">–</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__label">Communicated</span>
-          <span class="stat-card__num" id="count-communicated" style="color: var(--info);">–</span>
-        </div>
-        <div class="stat-card stat-card--accent">
-          <span class="stat-card__label">Efficiency</span>
-          <span class="stat-card__num" id="count-rate">–%</span>
-        </div>
-      </section>
-
-      <!-- Smart Filter Toolbar -->
-      <section class="toolbar">
-        <label class="field">
-          <span class="field__label">Financial Partition</span>
-          <select id="month-select"></select>
-        </label>
-        <label class="field field--grow">
-          <span class="field__label">Enterprise Search</span>
-          <input id="search-input" type="text" placeholder="Search subject, memo, sender...">
-        </label>
-        <label class="field">
-          <span class="field__label">Workflow Status</span>
-          <select id="status-filter">
-            <option value="">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Responded">Responded</option>
-            <option value="Communicated">Communicated</option>
-          </select>
-        </label>
-        <div>
-          <button id="export-btn" class="btn btn--ghost" style="height: 100%;">Export PDF</button>
-        </div>
-      </section>
-
-      <!-- Advanced Data Table -->
-      <section class="table-container">
-        <table class="ledger" id="ledger-table">
-          <thead>
-            <tr>
-              <th>SL</th>
-              <th style="min-width: 280px;">Subject & Origin</th>
-              <th>Memo Reference</th>
-              <th>Receipt Date</th>
-              <th>Target Timeline</th>
-              <th>Status</th>
-              <th style="min-width: 250px;">Disposal Action</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ledger-body">
-            <tr><td colspan="8" class="empty-row">Authenticate to synchronize database.</td></tr>
-          </tbody>
-        </table>
-      </section>
-      
-    </main>
-  </div>
-</div>
-
-<!-- Side Drawer -->
-<div id="drawer-overlay" class="drawer-overlay"></div>
-<aside id="letter-drawer" class="drawer">
-  <form id="letter-form" style="display: flex; flex-direction: column; height: 100%;">
-    <div class="drawer__header">
-      <h2 id="modal-title">Register Entry</h2>
-      <button type="button" class="drawer__close" id="drawer-close-btn">
-        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"></path></svg>
-      </button>
-    </div>
-    
-    <div class="drawer__content">
-      <input type="hidden" id="f-row">
-      <input type="hidden" id="f-month">
-      
-      <!-- Fluid Grid: Automatically stacks on mobile, side-by-side on desktop -->
-      <div class="drawer-grid">
-        <label class="field"><span class="field__label">SL Number</span>
-          <input id="f-slNo" type="text" placeholder="Auto"></label>
-        <label class="field"><span class="field__label">Workflow Status</span>
-          <select id="f-status">
-            <option value="Pending">Pending</option>
-            <option value="Responded">Responded</option>
-            <option value="Communicated">Communicated</option>
-          </select></label>
-        <label class="field field--full"><span class="field__label">Subject Context (Accepts Links)</span>
-          <textarea id="f-subject" rows="2" required></textarea></label>
-        <label class="field"><span class="field__label">Incoming Memo No.</span>
-          <input id="f-memoNo" type="text"></label>
-        <label class="field"><span class="field__label">Receipt Date</span>
-          <input id="f-date" type="date"></label>
-        <label class="field"><span class="field__label">Target Timeline</span>
-          <input id="f-timeLine" type="date"></label>
-        <label class="field"><span class="field__label">Mode of Response</span>
-          <input id="f-respondedThrough" type="text" placeholder="e.g., Email, Hard Copy"></label>
-        <label class="field"><span class="field__label">Outgoing Memo Ref</span>
-          <input id="f-respondedMemo" type="text"></label>
-        <label class="field field--full"><span class="field__label">Internal Remarks / File Links</span>
-          <textarea id="f-remarks" rows="3"></textarea></label>
-      </div>
-    </div>
-
-    <div class="drawer__footer">
-      <button type="button" class="btn btn--danger" id="modal-delete" style="margin-right: auto;" hidden>Delete</button>
-      <button type="button" class="btn btn--ghost" id="drawer-cancel-btn">Cancel</button>
-      <button type="submit" class="btn btn--primary" id="modal-save">Commit Record</button>
-    </div>
-  </form>
-</aside>
-
-<div id="toast" class="toast"></div>
-
-<script src="config.js"></script>
-<script src="app.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
