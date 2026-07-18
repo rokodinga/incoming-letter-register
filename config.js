@@ -3,5 +3,3 @@ window.DEFAULT_CONFIG = {
   apiKey: ''
 };
 
-// Debug helper
-window.DEBUG_TOKEN = '4db83321-75e4-4a79-b2dd-ea04d83cbc9e';
